@@ -1,2 +1,1 @@
-# Misc
-Repository to store various codes.
+## Repository to store various codes.
