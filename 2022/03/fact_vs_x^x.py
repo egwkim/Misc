@@ -5,8 +5,6 @@ Solve for x using newton's method and plot (x,n)
 
 
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import numpy as np
 import math
 
 lines, = plt.plot([], [])
