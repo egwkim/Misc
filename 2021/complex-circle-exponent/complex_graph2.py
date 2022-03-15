@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import matplotlib.colors
-#import numpy as np
+#import matplotlib.colors
 import cmath
 
 fig = plt.figure(figsize=(6, 6))
