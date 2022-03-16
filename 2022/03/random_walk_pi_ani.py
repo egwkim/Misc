@@ -39,6 +39,6 @@ def animate(i):
 
 
 anim = animation.FuncAnimation(
-    fig, animate, range(1,n+1), interval=10, blit=True, repeat=False)
+    fig, animate, range(1, n+1), interval=10, blit=True, repeat=False, cache_frame_data=False)
 
 plt.show()
