@@ -2,6 +2,10 @@
 Created after watching https://www.youtube.com/watch?v=h7apO7q16V0
 """
 
+# TODO FFT a polynomial with the degree which is not a power of two. (Add zeroes at the end)
+# TODO Add polynomial multiplication example.
+
+
 import cmath
 
 
