@@ -89,17 +89,3 @@ if __name__ == "__main__":
     print(P_value)
     print(IFFT(P_value))
 
-    test_case = [
-        [1, 2, 3, 4],
-        [2, 6],
-        [9, -32, 349, -1],
-        [32, 55, 1, 3],
-        [1, 2, 3, 4, 5, -6, -7, 8],
-        [1+2j, 3+4j, 5+6j, 7+8j]
-    ]
-
-    for i, x in enumerate(test_case):
-        # Calculate the IFFT of the FFT and compare it to the original P to check for errors.
-        y = IFFT(FFT(x))
-        # Error is calculated as the Sum of Squares of the Error (for each coefficients).
-        print(f"Test case no {i}, Error: {sum((j-k)**2 for j,k in zip(x,y))}")
