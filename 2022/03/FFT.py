@@ -2,22 +2,20 @@
 Created after watching https://www.youtube.com/watch?v=h7apO7q16V0
 """
 
-# TODO Add polynomial multiplication example.
-
 
 import math
 import cmath
 
 
-def nextpow2(n):
+def nextpow2(n: float):
     return 2**math.ceil(math.log2(n))
 
 
-def extend_list_with_zeroes(l, n):
+def extend_list_with_zeroes(l: list, n: int):
     return l + [0] * (n-len(l))
 
 
-def FFT(P, base=True):
+def FFT(P: list, base=True):
     """
     Computes the value representation of the given polynomial.
     The degree of the given polynomial should be the power of two.
@@ -38,7 +36,6 @@ def FFT(P, base=True):
         n = nextpow2(n)
         if n != original_n:
             P = extend_list_with_zeroes(P, n)
-            print(P)
 
     half_n = int(n/2)
 
@@ -62,7 +59,7 @@ def FFT(P, base=True):
     return y
 
 
-def IFFT(P, base=True):
+def IFFT(P: list, base=True):
     """
     Computes the coefficient representation of the given polynomial with the value representation.
     The degree of the given polynomial should be the power of two.
@@ -108,3 +105,21 @@ if __name__ == "__main__":
 
     print(P_value)
     print(IFFT(P_value))
+
+    print()
+
+    A = [1, 1, 1]
+    B = [1, 1, 1, 1]
+
+    n = nextpow2(max(len(A), len(B))*2)
+    A = extend_list_with_zeroes(A, n)
+    B = extend_list_with_zeroes(B, n)
+
+    A_value = FFT(A)
+    B_value = FFT(B)
+
+    C_value = [x*y for x, y in zip(A_value, B_value)]
+
+    C = IFFT(C_value)
+
+    print(C)
