@@ -1,3 +1,12 @@
+"""
+Modified collatz conjecture
+
+f(x) = n/2     if n is even
+       7n + 1  otherwise
+
+The trivial cycle is 1 -> 8 -> 4 -> 2-> 1 (length 4)
+"""
+
 import os
 
 l = []
