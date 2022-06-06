@@ -10,6 +10,20 @@ import json
 HOST = "0.0.0.0"
 PORT = int(os.environ.get("PORT", 8080))
 TIMEOUT = 10
+PROTOCOL = "HTTP/1.0"
+
+
+class HTTPResponse():
+    def __init__(self, code, body="", protocol=PROTOCOL):
+        self.code = code
+        self.body = body
+        self.protocol = PROTOCOL
+
+    def __str__(self):
+        return f"{self.protocol} {self.code}\n\n{self.body}"
+
+    def encode(self):
+        return self.__str__().encode()
 
 
 class HTTPRequest(BaseHTTPRequestHandler):
@@ -24,16 +38,20 @@ class HTTPRequest(BaseHTTPRequestHandler):
         self.error_message = message
 
 
-class NotFoundException(Exception):
-    pass
+class HTTPError(Exception):
+    def __init__(self, code: str, message: str = None):
+        super().__init__(message)
+        self.code = code
+        if message == None:
+            self.message = self.code + "\n"
+        else:
+            self.message = message
 
+    def __str__(self):
+        return self.message
 
-class TimeoutException(Exception):
-    pass
-
-
-class InvalidRequestException(Exception):
-    pass
+    def http_response(self):
+        return HTTPResponse(self.code, self.message)
 
 
 def factor(n: int):
@@ -42,11 +60,14 @@ def factor(n: int):
 
     factors = []
 
-    for k in (2, 3):
-        while n % k == 0:
-            n //= k
-            factors.append(k)
+    # Check 2
+    k = 2
+    while n % k == 0:
+        n //= k
+        factors.append(k)
 
+    # Check odd numbers until k * k < n
+    k = 3
     while k * k < n:
         if n % k == 0:
             n //= k
@@ -54,6 +75,7 @@ def factor(n: int):
         else:
             k += 2
 
+    # If n > 1, n is a prime number
     if n > 1:
         factors.append(n)
 
@@ -66,12 +88,9 @@ def processConnection(conn, addr):
         try:
             # Parse request
             recv = conn.recv(4096)
-            print(recv)
             req = HTTPRequest(recv)
             if req.error_code != None:
-                res = f"HTTP/1.0 {req.error_code} {req.error_message}\n\n"
-                raise InvalidRequestException(
-                    f"{req.error_code} {req.error_message}")
+                raise HTTPError(f"{req.error_code} {req.error_message}")
             try:
                 parsed = urlparse(req.path)
             except AttributeError:
@@ -83,12 +102,13 @@ def processConnection(conn, addr):
             if not path == "/":
                 raise NotFoundException("Path not found")
             if not query:
-                res = f"HTTP/1.0 200 OK\n\nPrime Factorization\nQuery with n=number\nn must be an intege and bigger than one\nExample {host}/?n=10\n"
+                res = HTTPResponse(
+                    "200 OK", "Prime Factorization\nQuery with n=number\nn must be an intege and bigger than one\nExample {host}/?n=10\n")
                 return
             try:
                 n_list = query['n']
             except KeyError:
-                raise NotFoundException("Invalid query")
+                raise HTTPError("404 Not Found", "Invalid query\n")
 
             # Process request
             factor_list = {}
@@ -103,19 +123,15 @@ def processConnection(conn, addr):
             if factor_list:
                 res = "HTTP/1.0 200 OK\n\n" + json.dumps(factor_list) + "\n"
             else:
-                raise NotFoundException("Invalid query")
+                raise HTTPError("404 Not Found", "Invalid query\n")
 
         # Handle exceptions and send response
-        except InvalidRequestException as e:
+        except HTTPError as e:
             print(e)
-        except NotFoundException as e:
-            res = f"HTTP/1.0 404 Not Found\n\n{e}\n"
+            res = e.http_response()
         finally:
             if res == "":
-                if req.error_code != None:
-                    res = f"HTTP/1.0 {req.error_code} {req.error_message}\n\n"
-                else:
-                    res = "HTTP/1.0 500 Internal Server Error\n\n"
+                res = HTTPResponse("500 Internal Server Error")
             conn.sendall(res.encode())
 
 
@@ -127,9 +143,11 @@ def handleConnection(conn, addr):
         if p.is_alive():
             p.terminate()
             p.join()
-            raise TimeoutException("Timeout while processing the request")
-    except TimeoutException as e:
-        conn.sendall(f"HTTP/1.0 503 Service Unavailable\n\n{e}\n".encode())
+            raise HTTPError("503 Service Unavailable",
+                            "Timeout while processing the request\n")
+    except HTTPError as e:
+        res = e.http_response()
+        conn.sendall(res.encode())
 
 
 def main():
