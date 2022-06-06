@@ -1,11 +1,10 @@
 from urllib.parse import urlparse, parse_qs
 from http.server import BaseHTTPRequestHandler
 from io import BytesIO
-from multiprocessing import Process, Queue
+from multiprocessing import Process
 import socket
 import os
 import json
-import time
 
 
 HOST = "0.0.0.0"
@@ -37,20 +36,27 @@ class InvalidRequestException(Exception):
     pass
 
 
-def factor(n: int, q: Queue = None):
+def factor(n: int):
     if n < 2:
         return
+
     factors = []
-    k = 2
-    while n != 1:
+
+    for k in (2, 3):
+        while n % k == 0:
+            n //= k
+            factors.append(k)
+
+    while k * k < n:
         if n % k == 0:
             n //= k
             factors.append(k)
         else:
-            k += 1
-    if q != None:
-        q.put(factors)
-        return
+            k += 2
+
+    if n > 1:
+        factors.append(n)
+
     return factors
 
 
