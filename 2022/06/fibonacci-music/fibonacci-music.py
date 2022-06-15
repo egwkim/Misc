@@ -13,9 +13,8 @@ def sine(f: float, t: float):
     return math.sin(2*pi*f*t/sampleRate)
 
 
-def chord(file: wave.Wave_write, base: float, multiplier: float, duration: float, fade: bool = True, fade_duration: float = 1):
-    duration = 2.5  # seconds
-    frequency = 440  # Hz
+def chord(file: wave.Wave_write, base: float, multiplier: float, duration: float,
+          fade: bool = True, fade_duration: float = 1, fade_coeff: float = 0.02):
     frame = bytes()
     for i in range(int(duration*sampleRate)):
         # Write every half second
@@ -25,19 +24,18 @@ def chord(file: wave.Wave_write, base: float, multiplier: float, duration: float
 
         # Generate sine value
         value = 0
-        value += sine(frequency, i)
-        value += sine(frequency * phi, i)
+        value += sine(base, i)
+        value += sine(base * multiplier, i)
 
         # Fade out for one second
-        if i > (duration-1)*sampleRate:
-            value *= 0.02**(i/sampleRate - duration + 1)
+        if fade and i > (duration-fade_duration)*sampleRate:
+            time = i/sampleRate - duration + fade_duration
+            value *= fade_coeff**(time / fade_duration)
 
         # Amplify and add to frame
         value = int(2047*value)
         frame += struct.pack('<h', value)
-
-    if frame:
-        file.wirteframes(frame)
+    file.wirteframes(frame)
 
 
 def golden_rhythm(file: wave.Wave_write):
@@ -47,11 +45,14 @@ def golden_rhythm(file: wave.Wave_write):
     # Play sound every phi * 60 / bpm seconds
 
 
-def fibonacci_rhythm(file: wave.Wave_write):
+def fibonacci_rhythm(out: wave.Wave_write):
     a = 13
     b = 21
 
-    bpm = 60 * a
+    bpm = 60 * a * 2
+
+    # A number of samples in one beat
+    beat_duration = sampleRate * 60 // bpm
 
     # Sound to play every a beats
     a_sound = []
@@ -60,10 +61,13 @@ def fibonacci_rhythm(file: wave.Wave_write):
             return
         if file.getframerate() != sampleRate:
             return
-        if file.getsampwidth != 2:
+        if file.getsampwidth() != 2:
             return
-        frames: bytes = file.readframes(sampleRate)
-        a_sound += list(struct.unpack('<h', frames))
+        while True:
+            frames: bytes = file.readframes(1)
+            if not frames:
+                break
+            a_sound += list(struct.unpack('<h', frames))
         if len(a_sound) > beat_duration:
             a_sound = a_sound[:beat_duration]
 
@@ -74,19 +78,19 @@ def fibonacci_rhythm(file: wave.Wave_write):
             return
         if file.getframerate() != sampleRate:
             return
-        if file.getsampwidth != 2:
+        if file.getsampwidth() != 2:
             return
-        frames: bytes = file.readframes(sampleRate)
-        b_sound += list(struct.unpack('<h', frames))
+        while True:
+            frames: bytes = file.readframes(1)
+            if not frames:
+                break
+            b_sound += list(struct.unpack('<h', frames))
         if len(b_sound) > beat_duration:
             b_sound = b_sound[:beat_duration]
 
     # Total number of samples
     duration = (sampleRate * a * b * 60 // bpm) + \
         max(len(a_sound), len(b_sound)) + 1
-
-    # A number of samples in one beat
-    beat_duration = sampleRate * 60 / bpm
 
     # Play sound every a beats
     a_beat: list = a_sound + [0] * (beat_duration * a - len(a_sound))
@@ -98,15 +102,15 @@ def fibonacci_rhythm(file: wave.Wave_write):
     for i in range(duration):
         if (i+1) % int(sampleRate/2) == 0:
             # Write every half second
-            file.writeframes(frame)
+            out.writeframes(frame)
             frame = bytes()
 
         # Add a_beat and b_beat
-        value = a_beat[i % beat_duration * a] + b_beat[i % beat_duration * b]
+        value = a_beat[i % len(a_beat)] + b_beat[i % len(b_beat)]
+        value //= 2
         frame += struct.pack('<h', value)
 
-    if frame:
-        file.writeframes(frame)
+    out.writeframes(frame)
 
 
 if __name__ == "__main__":
