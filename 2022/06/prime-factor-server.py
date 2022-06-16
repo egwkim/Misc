@@ -17,7 +17,7 @@ class HTTPResponse():
     def __init__(self, code, body="", protocol=PROTOCOL):
         self.code = code
         self.body = body
-        self.protocol = PROTOCOL
+        self.protocol = protocol
 
     def __str__(self):
         return f"{self.protocol} {self.code}\n\n{self.body}"
@@ -100,10 +100,10 @@ def processConnection(conn, addr):
             host = req.headers.get("Host")
             res = ''
             if not path == "/":
-                raise NotFoundException("Path not found")
+                raise HTTPError("404 Not Found", "Path not found\n")
             if not query:
                 res = HTTPResponse(
-                    "200 OK", "Prime Factorization\nQuery with n=number\nn must be an intege and bigger than one\nExample {host}/?n=10\n")
+                    "200 OK", f"Prime Factorization\nQuery with n=number\nn must be an intege and bigger than one\nExample {host}/?n=10\n")
                 return
             try:
                 n_list = query['n']
