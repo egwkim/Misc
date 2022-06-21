@@ -37,48 +37,76 @@ def chord(file: wave.Wave_write, base: float, multiplier: float, duration: float
     file.wirteframes(frame)
 
 
-def golden_rhythm(file: wave.Wave_write):
-    # TODO Add golden rhythm function
+def load_wav(filename: str, length: int):
+    wave_data = []
+    with wave.open(filename, 'r') as file:
+        if file.getnchannels() != 1:
+            return
+        if file.getframerate() != sampleRate:
+            return
+        if file.getsampwidth() != 2:
+            return
+        while True:
+            frames: bytes = file.readframes(1)
+            if not frames:
+                break
+            wave_data += list(struct.unpack('<h', frames))
+        if len(wave_data) > length:
+            wave_data = wave_data[:length]
+        else:
+            wave_data += [0] * (length - len(wave_data))
+    return wave_data
+
+
+def golden_rhythm(out: wave.Wave_write, bpm: float, beats: int, beat1: str, beat2: str = None):
+    if beat2 == None:
+        beat2 = beat1
+
+    frame: bytes = bytes()
+
+    # Total number of samples
+    duration: int = int(beats * sampleRate * 60 // bpm)
+
+    # The number of samples in one beat
+    beat_duration: int = int(sampleRate * 60 // bpm)
+
+    # Load sounds
+    a_sound = load_wav(beat1, beat_duration)
+    b_sound = load_wav(beat2, int(beat_duration*phi)+1)
+
     frame = bytes()
-    bpm = 120
-    # Play sound every 60 / bpm secons
-    # Play sound every phi * 60 / bpm seconds
+    for i in range(duration):
+        if (i+1) % int(sampleRate/2) == 0:
+            # Write every half second
+            out.writeframes(frame)
+            frame = bytes()
+
+        # Play a_sound every 60 / bpm secons
+        # Play b_sound every phi * 60 / bpm seconds
+        value = a_sound[i % beat_duration] + \
+            b_sound[int(i % (beat_duration*phi))]
+        value //= 2
+        frame += struct.pack('<h', value)
+
+    out.writeframes(frame)
 
 
-def fibonacci_rhythm(out: wave.Wave_write):
+def fibonacci_rhythm(out: wave.Wave_write, beat1: str, beat2: str = None):
+    if beat2 == None:
+        beat2 = beat1
+
     a = 13
     b = 21
     bpm = 60 * a * 2
 
-    # A number of samples in one beat
+    # The number of samples in one beat
     beat_duration = sampleRate * 60 // bpm
 
-    def load_wav(filename: str, length: int):
-        wave_data = []
-        with wave.open(filename, 'r') as file:
-            if file.getnchannels() != 1:
-                return
-            if file.getframerate() != sampleRate:
-                return
-            if file.getsampwidth() != 2:
-                return
-            while True:
-                frames: bytes = file.readframes(1)
-                if not frames:
-                    break
-                wave_data += list(struct.unpack('<h', frames))
-
-        # Match length of the wave data
-        if len(wave_data) > beat_duration:
-            wave_data = wave_data[:beat_duration]
-        wave_data += [0] * (length - len(wave_data))
-        return wave_data
-
     # Sound to play every a beats
-    a_sound = load_wav('a.wav', beat_duration * a)
+    a_sound = load_wav(beat1, beat_duration * a)
 
     # Sound to play every b beats
-    b_sound = load_wav('b.wav', beat_duration * b)
+    b_sound = load_wav(beat2, beat_duration * b)
 
     # Total number of samples
     duration = sampleRate * a * b * 60 // bpm
@@ -115,7 +143,9 @@ if __name__ == "__main__":
         elif mode == "2":
             chord(file, 440, 1.6, 2.5)
         elif mode == "3":
-            golden_rhythm(file)
+            bpm = int(input('BPM: '))
+            beats = int(input('Total beats: '))
+            golden_rhythm(file, bpm, beats, 'a.wav', 'a.wav')
         elif mode == "4":
             fibonacci_rhythm(file)
         else:
