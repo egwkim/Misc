@@ -1,1 +1,0 @@
-# A collection of some html/css templates that I might reuse someday.
