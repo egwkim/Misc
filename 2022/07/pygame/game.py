@@ -1,3 +1,4 @@
+import random
 import pygame
 import math
 import sys
@@ -13,21 +14,43 @@ green = (0, 255,   0)
 
 player_text = '🤔'
 
+obstacle_text = '💥'
+obstacle_cooldown = (15, 30)  # Min, max frames between two obstacles
+
+item_text = '⚡'
+item_cooldown = (120, 180)
 
 def main():
-    global window, clock, emoji_font, text_font
+    global window, clock, emoji_font, text_font, small_emoji_font
     pygame.init()
     window = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
     emoji_font = pygame.font.SysFont('Segoe UI Emoji', 50)
-    text_font = pygame.font.SysFont('Segoe UI', 50)
+    small_emoji_font = pygame.font.SysFont('Segoe UI Emoji', 20)
+    text_font = pygame.font.Font(None, 50)
     pygame.display.set_caption('My First Pygame!')
-
-    load_screen()
-    play()
-    game_over()
+    while True:
+        load_screen()
+        play()
+        retry = game_over()
+        if not retry:
+            break
     pygame.quit()
     sys.exit()
+
+
+def check_collision(pos1, radious, pos2, width, height):
+    # Check collision between a circle and a rectangle.
+    x_diff = abs(pos1[0] - pos2[0])
+    y_diff = abs(pos1[1] - pos2[1])
+
+    if x_diff > (radious + width/2) or y_diff > (radious + height/2):
+        return False
+
+    if x_diff <= width/2 or y_diff <= height/2:
+        return True
+
+    return ((x_diff-width/2)**2 + (y_diff-height/2)**2) <= radious
 
 
 def draw_rect_angle(surf, rect, pivot, angle, color):
@@ -45,8 +68,26 @@ def render_player(pos, angle=0, color=black):
     player_rect.center = pos
 
     window.blit(player, player_rect)
-    draw_rect_angle(window, player_rect_original, pos, angle, green)
+    #draw_rect_angle(window, player_rect_original, pos, angle, green)
+    pygame.draw.circle(window, green, pos, player_rect_original.height/2, 2)
 
+
+def render_obstacle(pos, color=black):
+    obstacle = emoji_font.render(obstacle_text, 1, color)
+    obstacle_rect = obstacle.get_rect()
+    obstacle_rect.center = pos
+
+    window.blit(obstacle, obstacle_rect)
+    draw_rect_angle(window, obstacle_rect, pos, 0, green)
+
+
+def render_item(pos, color=black):
+    item = small_emoji_font.render(item_text, 1, color)
+    item_rect = item.get_rect()
+    item_rect.center = pos
+    
+    window.blit(item, item_rect)
+    draw_rect_angle(window, item_rect, pos, 0, green)
 
 def load_screen():
     for i in range(0, 101, 10):
@@ -80,9 +121,16 @@ def load_screen():
 
 
 def play():
-    border = emoji_font.render(player_text, 1, black).get_height() / 2
-    max_y = height - border
-    min_y = border
+    obstacles = []
+    items = []
+
+    obstacle_size = emoji_font.render(obstacle_text, 1, black).get_size()
+    item_size = small_emoji_font.render(item_text, 1, black).get_size()
+
+    player_radious = emoji_font.render(player_text, 1, black).get_height() / 2
+    small_player_radious = small_emoji_font.render(player_text, 1, black).get_height() / 2
+    max_y = height - player_radious
+    min_y = player_radious
 
     x = 100
     y = height / 2
@@ -91,7 +139,24 @@ def play():
 
     moveUp = True
 
+    next_obstacle = random.randint(*obstacle_cooldown)
+    obstacle_counter = 0
+    next_item = random.randint(*item_cooldown)
+    item_counter = 0
     while True:
+        obstacle_counter += 1
+        item_counter += 1
+        if obstacle_counter == next_obstacle:
+            next_obstacle = random.randint(*obstacle_cooldown)
+            obstacle_counter = 0
+            obstacles.append(
+                [width+obstacle_size[0]/2, random.randint(obstacle_size[1]//2, height-obstacle_size[1]//2)])
+        if item_counter == next_item:
+            next_item = random.randint(*item_cooldown)
+            item_counter = 0
+            items.append(
+                [width+item_size[0]/2, random.randint(item_size[1]//2, height-item_size[1]//2)])
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -122,10 +187,51 @@ def play():
                 angle = 0
                 vy = 0
 
-        if False:  # TODO Add game over condition
-            return
+        for i, obstacle in enumerate(obstacles):
+            # Update obstacle
+            obstacle[0] -= vx
+            
+            if obstacle[0] < -(obstacle_size[0] / 2):
+                # Obstacle is out of the screen
+                obstacles[i] = False
 
+            else:
+                # Check collision with player
+                if check_collision((x, y), player_radious, obstacle, *obstacle_size):
+                    return
+                
+        try:
+            while True:
+                obstacles.remove(False)
+        except ValueError:
+            pass
+        
+        for i, item in enumerate(items):
+            # Update item
+            item[0] -= vx
+            
+            if item[0] < -(item_size[0] / 2):
+                # Item is out of the screen
+                items[i] = False
+                
+            else:
+                # Check collision with player
+                if check_collision((x, y), player_radious, item, *item_size):
+                    # Remove item
+                    items[i] = False
+                    # TODO Make player small
+        
+        try:
+            while True:
+                items.remove(False)
+        except ValueError:
+            pass
+        
         window.fill(white)
+        for pos in obstacles:
+            render_obstacle(pos)
+        for pos in items:
+            render_item(pos)
         render_player((x, y), angle)
 
         pygame.display.update()
@@ -133,7 +239,25 @@ def play():
 
 
 def game_over():
-    pass
+    text = text_font.render('Game over', 1, black)
+    rect = text.get_rect()
+    rect.center = (width/2, height/2)
+    window.fill(white)
+    window.blit(text, rect)
+    pygame.display.update()
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == KEYDOWN:
+                if event.key == K_SPACE:
+                    # Retry
+                    return True
+                elif event.key == K_ESCAPE:
+                    # Quit
+                    return False
+        clock.tick(fps)
 
 
 if __name__ == '__main__':
