@@ -20,6 +20,7 @@ obstacle_cooldown = (15, 30)  # Min, max frames between two obstacles
 item_text = '⚡'
 item_cooldown = (120, 180)
 
+
 def main():
     global window, clock, emoji_font, text_font, small_emoji_font
     pygame.init()
@@ -35,8 +36,7 @@ def main():
         retry = game_over()
         if not retry:
             break
-    pygame.quit()
-    sys.exit()
+    quit()
 
 
 def check_collision(pos1, radious, pos2, width, height):
@@ -59,8 +59,11 @@ def draw_rect_angle(surf, rect, pivot, angle, color):
     pygame.draw.lines(surf, color, True, pts, 3)
 
 
-def render_player(pos, angle=0, color=black):
-    player = emoji_font.render(player_text, 1, color)
+def render_player(pos, angle=0, small=False, color=black):
+    if small:
+        player = small_emoji_font.render(player_text, 1, color)
+    else:
+        player = emoji_font.render(player_text, 1, color)
     player_rect_original = player.get_rect()
     player_rect_original.center = pos
     player = pygame.transform.rotate(player, angle)
@@ -68,7 +71,6 @@ def render_player(pos, angle=0, color=black):
     player_rect.center = pos
 
     window.blit(player, player_rect)
-    #draw_rect_angle(window, player_rect_original, pos, angle, green)
     pygame.draw.circle(window, green, pos, player_rect_original.height/2, 2)
 
 
@@ -85,12 +87,19 @@ def render_item(pos, color=black):
     item = small_emoji_font.render(item_text, 1, color)
     item_rect = item.get_rect()
     item_rect.center = pos
-    
+
     window.blit(item, item_rect)
     draw_rect_angle(window, item_rect, pos, 0, green)
 
+
 def load_screen():
     for i in range(0, 101, 10):
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                quit()
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    quit()
         window.fill(white)
         render_player((i, height / 2))
         pygame.display.update()
@@ -102,11 +111,12 @@ def load_screen():
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
+                quit()
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     return
+                if event.key == K_ESCAPE:
+                    quit()
         window.fill(white)
 
         i += 1
@@ -127,8 +137,11 @@ def play():
     obstacle_size = emoji_font.render(obstacle_text, 1, black).get_size()
     item_size = small_emoji_font.render(item_text, 1, black).get_size()
 
-    player_radious = emoji_font.render(player_text, 1, black).get_height() / 2
-    small_player_radious = small_emoji_font.render(player_text, 1, black).get_height() / 2
+    big_player_radious = emoji_font.render(
+        player_text, 1, black).get_height() / 2
+    small_player_radious = small_emoji_font.render(
+        player_text, 1, black).get_height() / 2
+    player_radious = big_player_radious
     max_y = height - player_radious
     min_y = player_radious
 
@@ -138,6 +151,7 @@ def play():
     vy = 0
 
     moveUp = True
+    small = False
 
     next_obstacle = random.randint(*obstacle_cooldown)
     obstacle_counter = 0
@@ -159,14 +173,15 @@ def play():
 
         for event in pygame.event.get():
             if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
+                quit()
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     moveUp = True
             elif event.type == KEYUP:
                 if event.key == K_SPACE:
                     moveUp = False
+                elif event.key == K_ESCAPE:
+                    quit()
 
         if moveUp:
             vy += 1
@@ -187,52 +202,54 @@ def play():
                 angle = 0
                 vy = 0
 
-        for i, obstacle in enumerate(obstacles):
+        collision_possible = True
+        for obstacle in obstacles:
             # Update obstacle
             obstacle[0] -= vx
-            
-            if obstacle[0] < -(obstacle_size[0] / 2):
-                # Obstacle is out of the screen
-                obstacles[i] = False
 
-            else:
-                # Check collision with player
+            # Check collision with player
+            if collision_possible:
+                if (x + player_radious) < (obstacle[0] - obstacle_size[0] / 2):
+                    collision_possible = False
                 if check_collision((x, y), player_radious, obstacle, *obstacle_size):
                     return
-                
-        try:
-            while True:
-                obstacles.remove(False)
-        except ValueError:
-            pass
-        
+
+        # Obstacle is out of the screen
+        if obstacles and obstacles[0][0] < -(obstacle_size[0] / 2):
+            obstacles.pop(0)
+
+        collision_possible = True
         for i, item in enumerate(items):
             # Update item
             item[0] -= vx
-            
-            if item[0] < -(item_size[0] / 2):
-                # Item is out of the screen
-                items[i] = False
-                
-            else:
-                # Check collision with player
+
+            # Check collision with player
+            if collision_possible:
+                if (x + player_radious) < (item[0] - item_size[0] / 2):
+                    collision_possible = False
                 if check_collision((x, y), player_radious, item, *item_size):
                     # Remove item
-                    items[i] = False
-                    # TODO Make player small
-        
-        try:
-            while True:
-                items.remove(False)
-        except ValueError:
-            pass
-        
+                    items.pop(i)
+
+                    # Change player size
+                    small = not small
+                    if small:
+                        player_radious = small_player_radious
+                    else:
+                        player_radious = big_player_radious
+                    max_y = height - player_radious
+                    min_y = player_radious
+
+        # Item is out of the screen
+        if items and items[0][0] < - (item_size[0] / 2):
+            items.pop(0)
+
         window.fill(white)
         for pos in obstacles:
             render_obstacle(pos)
         for pos in items:
             render_item(pos)
-        render_player((x, y), angle)
+        render_player((x, y), angle, small)
 
         pygame.display.update()
         clock.tick(fps)
@@ -248,8 +265,7 @@ def game_over():
     while True:
         for event in pygame.event.get():
             if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
+                quit()
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     # Retry
@@ -258,6 +274,11 @@ def game_over():
                     # Quit
                     return False
         clock.tick(fps)
+
+
+def quit():
+    pygame.quit()
+    sys.exit()
 
 
 if __name__ == '__main__':
