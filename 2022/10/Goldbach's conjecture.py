@@ -1,4 +1,5 @@
 import math
+import matplotlib.pyplot as plt
 
 
 def calc_primes(n: int) -> list[bool]:
@@ -19,13 +20,9 @@ def calc_primes(n: int) -> list[bool]:
     return p
 
 
-def main():
-    # Input an even number
-    n = int(input())
-    if not n > 0:
-        return
-    if n % 2:
-        return
+def goldbach_pair(n: int) -> tuple[int, int]:
+    if not n > 3 or n % 2:
+        raise ValueError
 
     # Calculate prime numbers
     primes = calc_primes(n)
@@ -33,8 +30,45 @@ def main():
     # Brute force
     for i, p in enumerate(primes):
         if p and primes[n - i]:
-            print(i, n-i)
-            return
+            return (i, n-i)
+
+
+def visualize(n: int):
+    if not n > 3:
+        raise ValueError
+    primes = calc_primes(n)
+
+    x = []
+    y = []
+    cnt = [0] * (n+1)
+    cnt_graph_max = 0
+
+    for k in range(4, n + 1, 2):
+        for i, p in enumerate(primes):
+            if p and primes[k - i]:
+                x.append(i)
+                y.append(k-i)
+                cnt[i] += 1
+                cnt_graph_max = max(cnt_graph_max, i)
+                break
+
+    if not (n > 10**7):
+        plt.plot(x, y, '.')
+        plt.show()
+
+    plt.yscale('log')
+    plt.plot(range(cnt_graph_max+1), cnt[:cnt_graph_max+1], '.')
+    plt.show()
+
+
+def main():
+    """# Calculate Goldbach pair
+    # Input an even number
+    n = int(input())
+    print(goldbach_pair(n))
+    """
+
+    visualize(int(input()))
 
 
 if __name__ == '__main__':
