@@ -12,7 +12,7 @@ def calc_primes(n: int) -> list[bool]:
     p[0] = False
     p[1] = False
 
-    for i in range(2, n+1):
+    for i in range(2, math.floor(math.sqrt(n)) + 1):
         if p[i]:
             for j in range(i*i, n+1, i):
                 p[j] = False
@@ -28,9 +28,7 @@ def main():
         return
 
     # Calculate prime numbers
-    # m = math.floor(math.sqrt(n)) + 1
-    m = n
-    primes = calc_primes(m)
+    primes = calc_primes(n)
 
     # Brute force
     for i, p in enumerate(primes):
