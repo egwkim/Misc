@@ -34,7 +34,7 @@ def chord(file: wave.Wave_write, base: float, multiplier: float, duration: float
         # Amplify and add to frame
         value = int(2047*value)
         frame += struct.pack('<h', value)
-    file.wirteframes(frame)
+    file.writeframes(frame)
 
 
 def load_wav(filename: str, length: int):
@@ -81,7 +81,7 @@ def golden_rhythm(out: wave.Wave_write, bpm: float, beats: int, beat1: str, beat
             out.writeframes(frame)
             frame = bytes()
 
-        # Play a_sound every 60 / bpm secons
+        # Play a_sound every 60 / bpm seconds
         # Play b_sound every phi * 60 / bpm seconds
         value = a_sound[i % beat_duration] + \
             b_sound[int(i % (beat_duration*phi))]

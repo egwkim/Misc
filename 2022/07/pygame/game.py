@@ -39,18 +39,18 @@ def main():
     quit()
 
 
-def check_collision(pos1, radious, pos2, width, height):
+def check_collision(pos1, radius, pos2, width, height):
     # Check collision between a circle and a rectangle.
     x_diff = abs(pos1[0] - pos2[0])
     y_diff = abs(pos1[1] - pos2[1])
 
-    if x_diff > (radious + width/2) or y_diff > (radious + height/2):
+    if x_diff > (radius + width/2) or y_diff > (radius + height/2):
         return False
 
     if x_diff <= width/2 or y_diff <= height/2:
         return True
 
-    return ((x_diff-width/2)**2 + (y_diff-height/2)**2) <= radious
+    return ((x_diff-width/2)**2 + (y_diff-height/2)**2) <= radius
 
 
 def draw_rect_angle(surf, rect, pivot, angle, color):
@@ -137,13 +137,13 @@ def play():
     obstacle_size = emoji_font.render(obstacle_text, 1, black).get_size()
     item_size = small_emoji_font.render(item_text, 1, black).get_size()
 
-    big_player_radious = emoji_font.render(
+    big_player_radius = emoji_font.render(
         player_text, 1, black).get_height() / 2
-    small_player_radious = small_emoji_font.render(
+    small_player_radius = small_emoji_font.render(
         player_text, 1, black).get_height() / 2
-    player_radious = big_player_radious
-    max_y = height - player_radious
-    min_y = player_radious
+    player_radius = big_player_radius
+    max_y = height - player_radius
+    min_y = player_radius
 
     x = 100
     y = height / 2
@@ -209,9 +209,9 @@ def play():
 
             # Check collision with player
             if collision_possible:
-                if (x + player_radious) < (obstacle[0] - obstacle_size[0] / 2):
+                if (x + player_radius) < (obstacle[0] - obstacle_size[0] / 2):
                     collision_possible = False
-                if check_collision((x, y), player_radious, obstacle, *obstacle_size):
+                if check_collision((x, y), player_radius, obstacle, *obstacle_size):
                     return
 
         # Obstacle is out of the screen
@@ -225,20 +225,20 @@ def play():
 
             # Check collision with player
             if collision_possible:
-                if (x + player_radious) < (item[0] - item_size[0] / 2):
+                if (x + player_radius) < (item[0] - item_size[0] / 2):
                     collision_possible = False
-                if check_collision((x, y), player_radious, item, *item_size):
+                if check_collision((x, y), player_radius, item, *item_size):
                     # Remove item
                     items.pop(i)
 
                     # Change player size
                     small = not small
                     if small:
-                        player_radious = small_player_radious
+                        player_radius = small_player_radius
                     else:
-                        player_radious = big_player_radious
-                    max_y = height - player_radious
-                    min_y = player_radious
+                        player_radius = big_player_radius
+                    max_y = height - player_radius
+                    min_y = player_radius
 
         # Item is out of the screen
         if items and items[0][0] < - (item_size[0] / 2):
