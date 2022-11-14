@@ -99,7 +99,7 @@ function intersect(name, obj1, obj2) {
 function setXText() {
   const i = ggbApplet.getValue('i');
   const x = ggbApplet.getXcoord(`A_${i}`);
-  ggbApplet.setTextValue('text2', `x_${i}=${x.toFixed(6)}`);
+  ggbApplet.setTextValue('text2', `x_{${i}}=${x.toFixed(6)}`);
 }
 
 /**
