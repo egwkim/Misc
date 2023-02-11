@@ -15,12 +15,12 @@ print(chr(91))
 "Print python code"
 print(f'py:={chr(34)*3}{py}{chr(34)*3},')
 ""
-"Print markdown code and other things"
+"Print markdown string and other things at the end"
 print(f'md:={chr(34)*3}{md}{chr(34)*3},*map(exec,py.splitlines()){chr(93)} # -->')
 """,
 md:="""
 ]:#
-<!-- Markdown Code here -->
+<!-- Markdown here -->
 
 # Hello world! 👋
 
@@ -32,22 +32,87 @@ and also a [polyglot](https://en.wikipedia.org/wiki/Polyglot_(computing)).
 
 ## How does it work?
 
-Python code is inside the [Markdown link label](https://www.markdownguide.org/basic-syntax/#reference-style-links) so that it isn't displayed. In python, it is interpreted as a list. In the list, there are two string literals containing the python code and markdown code respectively. The main python code is stored in a variable called `py`, and executed later.
+*I recommend that you try it yourself first!*
 
-Markdown code is inside the python string literal, which is stored in a variable called `md`. The markdown link ends at the beginning of the string, and the text following it is displayed as markdown text.
+The code starts with an opening square brackets `[`.
 
-Python code is executed at the end of the file. It is mapped with a exec command, and then unpacked to be executed. It prints out the whole file using two variables `py` and `md`.
+In markdown, it is recognized as the start of a 
+[Markdown link label](https://www.markdownguide.org/basic-syntax/#reference-style-links)
+so the text inside isn't displayed.
+At some point we have to close it with something like `]:#`.
 
-Check out the raw code for further detail.
+In python, it is interpreted as the start of a list.
+Unlike markdown, we have to close it with a single `]`.
+
+Here's the trick.
+We can create a python string literal in a list, and close the markdown link in it.
+Then we write some markdown codes, start a markdown comment, and then close the python string literal and list inside it.
+
+```markdown
+[
+'''
+]:#
+
+# Markdown code
+ - Another markdown code
+
+<!-- '''] # -->
+```
+
+We just created a python - markdown polyglot!
+
+However, the python code does nothing yet. 
+To run python codes, I created another string containing the code and used `exec()` to execute it.
+
+```python
+[
+py:='''
+print("Hello, world!")
+''',
+md:='''
+]:#
+
+# Markdown code
+ - Another markdown code
+
+<!-- ''',*map(exec, py.splitlines())] # -->
+```
+
+I also saved markdown string in a variable to print it later.
+
+From here, we just have to print some special characters, `py` and `md`, and some more characters at the end.
+
+The complete code looks like this:
+
+```python
+[
+py:='''
+print(chr(91))
+print(f'py:={chr(39)*3}{py}{chr(39)*3},')
+print(f'md:={chr(39)*3}{md}{chr(39)*3},*map(exec, py.splitlines()){chr(93)} # -->')
+''',
+md:='''
+]:#
+
+# Markdown code
+ - Another markdown code
+
+<!-- ''',*map(exec, py.splitlines())] # -->
+```
 
 ## Make your own python-markdown polyglot!
 
-You can modify this file to your taste. But be careful! When editing python code, you can't use some markdown syntaxes. For example, using `#` for comments will break the markdown link. Also, when modifying both parts of the code, backslash will not work correctly.
+You can modify [this file](./python-template.md) to your taste.
+But be careful! When editing python code, you can't use some special characters.
+For example, using `#` for comments can break the markdown link. An empty new line also breaks the link.
+
+When modifying both parts of the code, backslash will break quine.
+
 
 ## My thoughts...
 
 Using exec might feel like cheating, but it works anyway 😅
 
-Maybe I'll try this later without using exec, and with escape sequences. 
+Maybe I'll try this later without using exec, and with allowing escape sequences and triple quotes.
 
 <!-- """,*map(exec,py.splitlines())] # -->
