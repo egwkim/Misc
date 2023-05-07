@@ -1,3 +1,6 @@
+import math
+from typing import Any, Type
+
 from manim import *
 from manim_slides import Slide
 
@@ -11,6 +14,18 @@ def tex_append_animation(tex: Tex, *strings: str, return_new_tex: bool = False):
     return TransformMatchingTex(tex, new_tex)
 
 
+def animate_submobjects(
+    mobject: Mobject,
+    AnimClass: Type[Animation],
+    animation_options: dict[str, Any] = {},
+    group_options: dict[str, Any] = {},
+    **kwargs,
+):
+    return AnimationGroup(
+        *(AnimClass(i, **animation_options) for i in mobject), **group_options, **kwargs
+    )
+
+
 class Intro(Slide):
     """
     풀이 개요
@@ -19,8 +34,6 @@ class Intro(Slide):
     """
 
     def construct(self):
-        # TODO Fix broken tex
-
         # <Title>
         title = Group(
             Text("미적분을 활용한").scale(1.5),
@@ -144,24 +157,20 @@ class Intro(Slide):
         self.wait()
         self.next_slide()
 
-        solution1 = MathTex("x")
-        self.play(Create(solution1), run_time=0.5)
+        solution1_1 = MathTex("x")
+        solution1_2 = MathTex("x", r", \; ", "y")
+        solution1_3 = MathTex("x", r" + 2 ", "y", " = 8")
+        self.play(Create(solution1_1), run_time=0.5)
         self.wait()
         self.next_slide()
         self.play(
-            Transform(
-                solution1,
-                MathTex("x", r", \; ", "y"),
-            ),
+            ReplacementTransform(solution1_1, solution1_2),
             run_time=0.5,
         )
         self.wait()
         self.next_slide()
         self.play(
-            TransformMatchingTex(
-                solution1,
-                MathTex("x", r" + 2 \cdot ", "y", " = 8"),
-            ),
+            TransformMatchingTex(solution1_2, solution1_3),
             run_time=0.5,
         )
         self.wait()
@@ -181,17 +190,43 @@ class Intro(Slide):
         solution3_strings.pop()
 
         solution2 = MathTex(*solution2_strings)
-        self.play(solution1.animate.shift(UP * 2), run_time=0.5)
-        self.play(Create(solution2, run_time=2))
+        self.play(solution1_3.animate.shift(UP * 2), run_time=0.5)
+        self.play(
+            AnimationGroup(
+                *(Create(i) for i in solution2),
+                lag_ratio=1,
+                run_time=2,
+            )
+        )
+        self.play(solution2.animate.shift(UP * 0.4), run_time=0.3)
         self.wait()
         self.next_slide()
 
-        solution3 = MathTex(*solution3_strings)
-        self.play(solution2.animate.shift(UP * 1), run_time=0.5)
-        self.play(
-            TransformMatchingTex(solution2.copy(), solution3, key_map=solution_key_map)
-        )
+        solution3 = MathTex(*solution3_strings).shift(DOWN)
+        self.play(Transform(solution2[0][1].copy(), solution3[0]))
+        self.wait()
+        self.next_slide()
+        self.play(Transform(solution2[1][0].copy(), solution3[1:3]))
+        self.wait()
+        self.next_slide()
 
+        transforms = []
+        for i in range(1, 5):
+            transforms.append(
+                Transform(solution2[3 * i][1].copy(), solution3[4 * i - 1 : 4 * i + 1])
+            )
+            transforms.append(
+                Transform(
+                    solution2[3 * i + 1][0].copy(), solution3[4 * i + 1 : 4 * i + 3]
+                )
+            )
+        self.play(AnimationGroup(*transforms, lag_ratio=0.3))
+        self.wait()
+        self.next_slide()
+
+        answer = MathTex("= 1107")
+        answer.scale(1.2).next_to(solution3, DOWN, buff=1)
+        self.play(Create(answer))
         self.wait()
         self.next_slide()
 
@@ -497,9 +532,6 @@ class ComplexTrigonometry(Slide):
     """
 
     def construct(self):
-        self.wait()
-        self.next_slide()
-
         polynomial = MathTex("f(x) = ax + b")
         self.play(Create(polynomial))
         self.wait()
@@ -522,7 +554,7 @@ class ComplexTrigonometry(Slide):
         self.play(
             polynomial.animate.shift(UP),
         )
-        self.play(AnimationGroup(*[Create(i) for i in values], lag_ratio=0.5))
+        self.play(animate_submobjects(values, Create, lag_ratio=0.5))
         self.wait()
         self.next_slide()
 
@@ -595,10 +627,7 @@ class ComplexTrigonometry(Slide):
         self.play(
             AnimationGroup(
                 polynomial.animate.shift(UP * 2),
-                AnimationGroup(
-                    *[Create(i) for i in values],
-                    lag_ratio=0.5,
-                ),
+                animate_submobjects(values, Create, lag_ratio=0.5),
                 lag_ratio=0.8,
             )
         )
@@ -608,10 +637,7 @@ class ComplexTrigonometry(Slide):
         self.play(
             AnimationGroup(
                 values.animate.shift(LEFT * 3.7).scale(0.9),
-                AnimationGroup(
-                    *[Create(i) for i in coeffs],
-                    lag_ratio=0.5,
-                ),
+                animate_submobjects(coeffs, Create, lag_ratio=0.5),
                 lag_ratio=0.8,
             )
         )
@@ -622,37 +648,39 @@ class ComplexTrigonometry(Slide):
         self.wait()
         self.next_slide()
 
-        complex_number = MathTex(
-            "a", " + ", "bi", substrings_to_isolate=["a", "b", "i"]
-        ).scale(1.5)
+        complex_number = MathTex("a + b i", substrings_to_isolate=" ").scale(1.8)
         self.play(FadeIn(complex_number))
         self.wait()
         self.next_slide()
 
         self.play(Indicate(complex_number[0]))
-        self.play(Indicate(complex_number[2:]))
+        self.play(Indicate(complex_number[4:]))
 
         self.wait()
         self.next_slide()
 
         complex_mult = MathTex(
-            "(a + bi)",
-            "(c + di)",
-            substrings_to_isolate=["a", "b", "c", "d", "i"],
-        ).scale(1.2)
+            "( a + b i )",
+            "( c + d i )",
+            substrings_to_isolate=" ",
+        ).scale(1.4)
         self.play(
-            TransformMatchingShapes(complex_number, complex_mult[:6]),
-            TransformMatchingShapes(complex_number.copy(), complex_mult[6:]),
+            TransformMatchingShapes(complex_number, complex_mult[:11]),
+            FadeIn(complex_mult[11:]),
         )
         self.wait()
         self.next_slide()
 
         complex_mult_result = MathTex(
-            "(ac - bd) + ",
-            "(ad + bc)i",
-            substrings_to_isolate=["a", "b", "c", "d", "i"],
-        ).scale(1.2)
-        self.play(TransformMatchingTex(complex_mult, complex_mult_result))
+            "= ( a c - b d ) + ",
+            "( a d + b c ) i",
+            substrings_to_isolate=" ",
+        )
+        complex_mult_result.scale(1.4).shift(UP * 0.5)
+        self.play(
+            complex_mult.animate.shift(UP * 1.5),
+            TransformMatchingTex(complex_mult.copy(), complex_mult_result),
+        )
         self.wait()
         self.next_slide()
 
@@ -663,33 +691,173 @@ class ComplexTrigonometry(Slide):
             r"b = \sin(\alpha) &",
             r"  \quad ",
             r"d = \sin(\beta) \\ ",
-            substrings_to_isolate=[
-                r"\cos(\alpha)",
-                r"\cos(\beta)",
-                r"\sin(\alpha)",
-                r"\sin(\beta)",
-            ],
-        ).next_to(complex_mult_result, DOWN)
-        self.play(Create(substitution))
+            substrings_to_isolate=" ",
+        )
+        substitution.scale(1.4).next_to(complex_mult_result, DOWN, buff=1)
+        self.play(animate_submobjects(substitution, Create, lag_ratio=0.1, run_time=1))
         self.wait()
         self.next_slide()
 
-        complex_mult_substituted = MathTex(
-            r"( \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta)) + ",
-            r"( \cos(\alpha) \sin(\beta) + \sin(\alpha) \cos(\beta))i",
-            substrings_to_isolate=[
-                r"\cos(\alpha)",
-                r"\cos(\beta)",
-                r"\sin(\alpha)",
-                r"\sin(\beta)",
-                "i",
-            ],
+        complex_mult_subs = MathTex(
+            r"& ( \cos(\alpha) + i \sin(\alpha) ) ",
+            r"( \cos(\beta) + i \sin(\beta) ) \\ ",
+            r"= \; & ( \cos(\alpha) \cos(\beta) - \sin(\alpha) \sin(\beta) ) \\ ",
+            r"& + i \cdot ( \cos(\alpha) \sin(\beta) + \sin(\alpha) \cos(\beta) )",
+            substrings_to_isolate=" ",
+        )
+        complex_mult_subs.scale(1.2).shift(UP * 0.5)
+        complex_mult_subs_result = MathTex(
+            r"=\;& \cos ( \alpha + \beta ) + i \sin( \alpha + \beta )",
+            substrings_to_isolate=" ",
+        )
+        complex_mult_subs_result.scale(1.2)
+
+        Group(complex_mult_subs, complex_mult_subs_result).arrange(
+            DOWN, center=False, aligned_edge=LEFT
         )
 
         self.play(
-            TransformMatchingTex(complex_mult_result, complex_mult_substituted),
-            TransformMatchingTex(substitution, complex_mult_substituted),
+            TransformMatchingTex(complex_mult, complex_mult_subs),
+            TransformMatchingTex(complex_mult_result, complex_mult_subs),
+            TransformMatchingTex(substitution, complex_mult_subs),
         )
+        self.wait()
+        self.next_slide()
+
+        # Highlight cos addition
+        self.play(Circumscribe(complex_mult_subs[36:45]))
+        self.wait()
+        self.next_slide()
+
+        # Highlight sin addition
+        self.play(Circumscribe(complex_mult_subs[60:69]))
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            animate_submobjects(
+                complex_mult_subs_result, Create, lag_ratio=1, run_time=1
+            )
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            AnimationGroup(
+                FadeOut(complex_mult_subs[27:]),
+                AnimationGroup(
+                    complex_mult_subs[:27].animate.shift(DOWN * 0.7).scale(1.2),
+                    complex_mult_subs_result.animate.shift(UP * 0.5).scale(1.2),
+                ),
+                lag_ratio=0.7,
+            )
+        )
+        self.play(
+            AnimationGroup(
+                Circumscribe(complex_mult_subs[3:11]),
+                Circumscribe(complex_mult_subs[16:23]),
+                lag_ratio=0.8,
+            )
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            Indicate(complex_mult_subs_result[5:12]),
+            Indicate(complex_mult_subs_result[19:25]),
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.wait()
+        self.next_slide()
+
+        plane = ComplexPlane(
+            x_range=(-2.4, 2.4, 1),
+            y_range=(-1.5, 1.5, 1),
+            x_length=12,
+            y_length=7.5,
+            faded_line_ratio=4,
+            axis_config={"include_numbers": True},
+        )
+        unit_circle = Circle.from_three_points(
+            *(plane.n2p(1), plane.n2p(-1), plane.n2p(1j)),
+            color=GREEN,
+        )
+
+        self.play(FadeIn(plane))
+        self.wait()
+        self.next_slide()
+
+        self.play(Create(unit_circle))
+        self.wait()
+        self.next_slide()
+
+        def create_point_on_unit_circle(
+            angle: float, text: str, arc_radius: float, color: str
+        ):
+            objs = {}
+            objs["point"] = unit_circle.point_at_angle(angle)
+            objs["circle"] = Circle(0.08, color=color, fill_opacity=1).move_to(
+                objs["point"]
+            )
+            objs["label"] = MathTex(rf"\cos {text} + i \sin {text}")
+            objs["label"].next_to(objs["circle"], objs["point"], 0.1)
+
+            objs["path"] = Arc(radius=plane.get_x_unit_size(), angle=angle)
+            objs["segment"] = Line(plane.n2p(0), plane.n2p(1))
+            objs["arc"] = Arc(
+                plane.get_x_unit_size() * arc_radius, angle=angle, color=color
+            )
+            objs["text"] = MathTex(text).next_to(
+                plane.n2p(0), unit_circle.point_at_angle(angle / 2), 0.3
+            )
+            objs["circle"].move_to(plane.n2p(1)).set_z_index(1)
+
+            self.play(
+                AnimationGroup(
+                    Create(objs["segment"], run_time=0.5),
+                    GrowFromCenter(objs["circle"], run_time=0.5),
+                    lag_ratio=1,
+                )
+            )
+            self.play(
+                AnimationGroup(
+                    MoveAlongPath(objs["circle"], objs["path"]),
+                    objs["segment"].animate.rotate_about_origin(angle),
+                    Create(objs["arc"]),
+                    lag_ratio=0,
+                )
+            )
+            self.play(
+                AnimationGroup(
+                    Write(objs["text"]),
+                    Flash(
+                        objs["point"],
+                        line_length=0.1,
+                        flash_radius=0.2,
+                        line_stroke_width=2,
+                    ),
+                    Write(objs["label"]),
+                    lag_ratio=0.5,
+                )
+            )
+
+            return objs
+
+        alpha = PI / 6
+        alpha_objs = create_point_on_unit_circle(alpha, r"\alpha", 0.225, RED)
+        self.wait()
+        self.next_slide()
+
+        beta = PI * 3 / 4
+        beta_objs = create_point_on_unit_circle(beta, r"\beta", 0.2, BLUE)
+        self.wait()
+        self.next_slide()
+        
+        angle_sum = alpha + beta
+        angle_sum_objs = create_point_on_unit_circle(angle_sum, r"\alpha + \beta", 0.25, PURPLE)
         self.wait()
         self.next_slide()
 
