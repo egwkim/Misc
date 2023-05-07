@@ -77,7 +77,7 @@ def main():
     # or input keys to change scenes
     
     #scenes = "Intro Polynomial ComplexTrigonometry ValueToCoeff Integral Outro"
-    scenes = "ComplexTrigonometry"
+    scenes = "Integral"
     output = "slides.html"
     verbosity = "info"
     command = (

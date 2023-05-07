@@ -554,7 +554,7 @@ class ComplexTrigonometry(Slide):
         self.play(
             polynomial.animate.shift(UP),
         )
-        self.play(animate_submobjects(values, Create, lag_ratio=0.5))
+        self.play(animate_submobjects(values, Create, lag_ratio=0.5, run_time=0.8))
         self.wait()
         self.next_slide()
 
@@ -649,7 +649,7 @@ class ComplexTrigonometry(Slide):
         self.next_slide()
 
         complex_number = MathTex("a + b i", substrings_to_isolate=" ").scale(1.8)
-        self.play(FadeIn(complex_number))
+        self.play(FadeIn(complex_number, scale=0.5))
         self.wait()
         self.next_slide()
 
@@ -781,12 +781,14 @@ class ComplexTrigonometry(Slide):
             faded_line_ratio=4,
             axis_config={"include_numbers": True},
         )
+        coord_labels = plane.get_coordinate_labels()
+
         unit_circle = Circle.from_three_points(
             *(plane.n2p(1), plane.n2p(-1), plane.n2p(1j)),
             color=GREEN,
         )
 
-        self.play(FadeIn(plane))
+        self.play(FadeIn(plane, coord_labels))
         self.wait()
         self.next_slide()
 
@@ -795,71 +797,119 @@ class ComplexTrigonometry(Slide):
         self.next_slide()
 
         def create_point_on_unit_circle(
-            angle: float, text: str, arc_radius: float, color: str
+            angle: float,
+            text: str,
+            arc_radius: float,
+            color: str,
+            angle_text: bool = True,
         ):
             objs = {}
             objs["point"] = unit_circle.point_at_angle(angle)
-            objs["circle"] = Circle(0.08, color=color, fill_opacity=1).move_to(
-                objs["point"]
-            )
+            objs["circle"] = Circle(0.08, color=color, fill_opacity=1)
             objs["label"] = MathTex(rf"\cos {text} + i \sin {text}")
-            objs["label"].next_to(objs["circle"], objs["point"], 0.1)
+            objs["label"].scale(0.7).next_to(objs["point"], objs["point"], 0.1)
 
             objs["path"] = Arc(radius=plane.get_x_unit_size(), angle=angle)
             objs["segment"] = Line(plane.n2p(0), plane.n2p(1))
             objs["arc"] = Arc(
                 plane.get_x_unit_size() * arc_radius, angle=angle, color=color
             )
-            objs["text"] = MathTex(text).next_to(
-                plane.n2p(0), unit_circle.point_at_angle(angle / 2), 0.3
-            )
+
+            text_anim = Wait(run_time=0)
+            if angle_text:
+                objs["text"] = MathTex(text)
+                objs["text"].scale(0.6).next_to(
+                    plane.n2p(0), unit_circle.point_at_angle(angle / 2), 0.3
+                )
+                text_anim = Write(objs["text"])
+
             objs["circle"].move_to(plane.n2p(1)).set_z_index(1)
 
             self.play(
                 AnimationGroup(
                     Create(objs["segment"], run_time=0.5),
                     GrowFromCenter(objs["circle"], run_time=0.5),
-                    lag_ratio=1,
+                    lag_ratio=0.7,
                 )
             )
             self.play(
                 AnimationGroup(
                     MoveAlongPath(objs["circle"], objs["path"]),
-                    objs["segment"].animate.rotate_about_origin(angle),
+                    Rotate(objs["segment"], angle=angle, about_point=plane.n2p(0)),
                     Create(objs["arc"]),
                     lag_ratio=0,
                 )
             )
             self.play(
                 AnimationGroup(
-                    Write(objs["text"]),
+                    text_anim,
                     Flash(
                         objs["point"],
                         line_length=0.1,
                         flash_radius=0.2,
                         line_stroke_width=2,
                     ),
-                    Write(objs["label"]),
-                    lag_ratio=0.5,
+                    Write(objs["label"], run_time=0.8),
+                    lag_ratio=0.3,
                 )
             )
 
-            return objs
+            displayed_mobjs = []
+            for key in "segment circle arc label".split():
+                displayed_mobjs.append(objs[key])
+            if angle_text:
+                displayed_mobjs.append(objs["text"])
+
+            return objs, displayed_mobjs
 
         alpha = PI / 6
-        alpha_objs = create_point_on_unit_circle(alpha, r"\alpha", 0.225, RED)
+        alpha_objs, alpha_mobjs = create_point_on_unit_circle(
+            alpha, r"\alpha", 0.25, RED
+        )
+        self.wait()
+        self.next_slide()
+
+        alpha_x = Line(plane.n2p(0), (alpha_objs["point"][0], 0, 0))
+        alpha_x_label = MathTex(r"\cos \alpha").scale(0.7).next_to(alpha_x, DOWN)
+        alpha_y = Line((alpha_objs["point"][0], 0, 0), alpha_objs["point"])
+        alpha_y_label = MathTex(r"\sin \alpha").scale(0.7).next_to(alpha_y, RIGHT)
+
+        self.play(Create(alpha_x), Write(alpha_x_label))
+        self.wait()
+        self.next_slide()
+        self.play(Create(alpha_y), Write(alpha_y_label))
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            Uncreate(
+                VGroup(alpha_x, alpha_x_label, alpha_y, alpha_y_label), run_time=0.6
+            )
+        )
         self.wait()
         self.next_slide()
 
         beta = PI * 3 / 4
-        beta_objs = create_point_on_unit_circle(beta, r"\beta", 0.2, BLUE)
+        beta_objs, beta_mobjs = create_point_on_unit_circle(beta, r"\beta", 0.225, BLUE)
         self.wait()
         self.next_slide()
-        
+
         angle_sum = alpha + beta
-        angle_sum_objs = create_point_on_unit_circle(angle_sum, r"\alpha + \beta", 0.25, PURPLE)
+        angle_sum_objs, angle_sum_mobjs = create_point_on_unit_circle(
+            angle_sum, r"( \alpha + \beta )", 0.2, PURPLE, False
+        )
         self.wait()
         self.next_slide()
+
+        self.play(
+            AnimationGroup(FadeOut(*alpha_mobjs, *beta_mobjs, *angle_sum_mobjs)),
+            FadeOut(unit_circle),
+            lag_ratio=0.7,
+        )
+        self.wait()
+        self.next_slide()
+
+        # TODO
 
         self.play(*[FadeOut(mob) for mob in self.mobjects])
         self.wait()
@@ -883,6 +933,61 @@ class Integral(Slide):
     """
 
     def construct(self):
+        integral = MathTex(r"\int^1_0 \cos^n{2 \pi x} \> dx").scale(1.2)
+        integral_calc = MathTex(
+            r"I_n &= ",
+            r"\int^1_0 \cos^n{2 \pi x} \> dx \\ ",
+            r"&= \{1 - \sin^2{(2 \pi x)}\} \; \cos^{n-2}{2 \pi x} \\ ",
+            r"&= I_{n-2} - \int^1_0 \cos^{n-2}{(2 \pi x)}\sin^2{(2 \pi x)} \> dx \\",
+        ).shift(LEFT * 0.5)
+        integral.match_y(integral_calc[0])
+
+        self.play(Write(integral))
+        self.wait()
+        self.next_slide()
+
+        integral_1 = MathTex(
+            r"I_1 = & \int^1_0 \cos{2 \pi x} \> dx \\ ",
+            r"= & \bigl[ {1 \over 2 \pi} \sin( 2 \pi x) \bigr] ^1 _0 \\ ",
+            r"= & 0",
+        )
+        integral_1.shift(RIGHT * 2.2)
+
+        integral_2 = MathTex(
+            r"I_2 = & \int^1_0 \cos^2 {2 \pi x} \> dx \\ ",
+            r"= & \int^1_0 {\cos {4 \pi x} + 1 \over 2 } \> dx \\ ",
+            r"= & \bigl[ {1 \over 8 \pi} \sin( 4 \pi x) + {1 \over 2} x \bigr] ^1 _0 \\ ",
+            r"= & 1 \over 2",
+        )
+        integral_2.align_to(integral_1, LEFT)
+
+        self.play(TransformMatchingShapes(integral, integral_calc[:2]))
+        self.wait()
+        self.next_slide()
+
+        self.play(Write(integral_1))
+        self.wait()
+        self.next_slide()
+
+        self.play(Uncreate(integral_1), run_time=0.5)
+        self.play(Write(integral_2))
+        self.wait()
+        self.next_slide()
+
+        self.play(Uncreate(integral_2), run_time=0.5)
+        self.wait()
+        self.next_slide()
+
+        self.play(integral_calc[:2].animate.shift(UP), run_time=0.5)
+        integral_calc[2:].shift(UP)
+        self.play(Write(integral_calc[2]))
+        self.wait()
+        self.next_slide()
+
+        self.play(Write(integral_calc[3]), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
         self.play(*[FadeOut(mob) for mob in self.mobjects])
         self.wait()
         self.next_slide()

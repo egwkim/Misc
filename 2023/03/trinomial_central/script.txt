@@ -70,6 +70,9 @@ TODO add explanation
 a = cos alpha, b = sin alpha, c = cos beta, d = sin beta 를 대입해보겠습니다.
 그러면 다음과 같이 곱셈 결과의 실수부는 cos(alpha + beta)가 되고, 허수부는 sin(alpha + beta)가 됩니다.
 복소수의 곱셈과 삼각함수 덧셈 정리에 이런 연관성이 있는 것입니다.
+
+complex plane -> multiplication of units -> addition -> generalize multipication -> nth roots of unity
+
 삼각함수를 좌표평면 위의 단위원으로 정의했었는데요,
 그렇다면 cos alpha + i sin alpha 꼴로 나타낼 수 있는 복소수는 단위원 위의 한 점에 대응시킬 수 있습니다.
 이때, 실수부는 점의 x좌표, 허수부는 점의 y좌표에 해당합니다.
