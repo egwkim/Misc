@@ -1,4 +1,3 @@
-import math
 from typing import Any, Type
 
 from manim import *
@@ -933,13 +932,18 @@ class Integral(Slide):
     """
 
     def construct(self):
+        # TODO Highlight equations
+
         integral = MathTex(r"\int^1_0 \cos^n{2 \pi x} \> dx").scale(1.2)
         integral_calc = MathTex(
             r"I_n &= ",
-            r"\int^1_0 \cos^n{2 \pi x} \> dx \\ ",
-            r"&= \{1 - \sin^2{(2 \pi x)}\} \; \cos^{n-2}{2 \pi x} \\ ",
-            r"&= I_{n-2} - \int^1_0 \cos^{n-2}{(2 \pi x)}\sin^2{(2 \pi x)} \> dx \\",
-        ).shift(LEFT * 0.5)
+            r"\int^1_0 \cos^n {2 \pi x} \> dx \\ ",
+            r"&= \int^1_0 \{ 1 - \sin^2 {2 \pi x} \} \, \cos^{n-2} {2 \pi x} \> dx \\ ",
+            r"&= I_{n-2} - \int^1_0 \cos^{n-2} {2 \pi x} \, \sin^2 {2 \pi x} \> dx \\",
+            r"&= I_{n-2} - \bigl[ \sin {2 \pi x} \cdot \{ - {1 \over 2 \pi (n-1)} \, \cos^{n-1} {2 \pi x} \} \bigr]^1_0 \\",
+            r"& + \int^1_0 2 \pi \, \cos {2 \pi x} \, \{ - {1 \over 2 \pi (n-1)} \, \cos^{n-1} {2 \pi x} \} \> dx",
+        )
+        integral_calc.scale(0.8).shift(LEFT * 1.5)
         integral.match_y(integral_calc[0])
 
         self.play(Write(integral))
@@ -947,8 +951,8 @@ class Integral(Slide):
         self.next_slide()
 
         integral_1 = MathTex(
-            r"I_1 = & \int^1_0 \cos{2 \pi x} \> dx \\ ",
-            r"= & \bigl[ {1 \over 2 \pi} \sin( 2 \pi x) \bigr] ^1 _0 \\ ",
+            r"I_1 = & \int^1_0 \cos {2 \pi x} \> dx \\ ",
+            r"= & \bigl[ {1 \over 2 \pi} \sin {2 \pi x} \bigr] ^1 _0 \\ ",
             r"= & 0",
         )
         integral_1.shift(RIGHT * 2.2)
@@ -961,30 +965,310 @@ class Integral(Slide):
         )
         integral_2.align_to(integral_1, LEFT)
 
+        integral_1_2 = MathTex(r"I_1 = & 0 \\ ", r"I_2 = & 1 \over 2")
+        integral_1_2.scale(0.7).shift(UP * 2.6 + RIGHT * 4.5)
+
         self.play(TransformMatchingShapes(integral, integral_calc[:2]))
         self.wait()
         self.next_slide()
 
-        self.play(Write(integral_1))
+        self.play(Write(integral_1), run_time=0.5)
         self.wait()
         self.next_slide()
 
-        self.play(Uncreate(integral_1), run_time=0.5)
+        self.play(ReplacementTransform(integral_1, integral_1_2[0]), run_time=0.5)
         self.play(Write(integral_2))
         self.wait()
         self.next_slide()
 
-        self.play(Uncreate(integral_2), run_time=0.5)
+        self.play(ReplacementTransform(integral_2, integral_1_2[1]), run_time=0.6)
         self.wait()
         self.next_slide()
 
-        self.play(integral_calc[:2].animate.shift(UP), run_time=0.5)
-        integral_calc[2:].shift(UP)
-        self.play(Write(integral_calc[2]))
+        self.play(integral_calc[:2].animate.shift(UP * 0.5), run_time=0.5)
+        integral_calc[2:].shift(UP * 0.5)
+        self.play(Write(integral_calc[2]), run_time=0.7)
         self.wait()
         self.next_slide()
 
+        self.play(
+            Group(*integral_calc[2][1:4], integral_calc[2][5], *integral_calc[2][15:])
+            .animate(lag_ratio=1, run_time=0.5)
+            .set_color(BLUE)
+        )
+        self.wait()
+        self.next_slide()
+
+        integral_calc[3][1:5].set_color(BLUE)
         self.play(Write(integral_calc[3]), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
+        substitution = MathTex(
+            r"u = \sin {2 \pi x}, & \quad v' = \sin {2 \pi x} \cos ^{n-2} {2 \pi x} \\ ",
+            r"u' = 2 \pi \cos {2 \pi x}, & \quad v = -{1 \over 2 \pi (n-1)} \cos ^{n-1} {2 \pi x}",
+        )
+        substitution.scale(0.8).next_to(integral_calc[3], DOWN, 1).set_x(0)
+        self.play(Write(substitution[0]), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
+        self.play(Write(substitution[1]), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
+        substitution_applied = MathTex(
+            r"= I_{n-2} - \bigl[ u v \bigr]^1_0 + \int^1_0 u' v \> dx",
+        )
+        (
+            substitution_applied.scale(0.8)
+            .next_to(integral_calc[3], DOWN)
+            .align_to(integral_calc[4], LEFT)
+        )
+
+        substitution.save_state()
+        substitution.scale(0.5).shift(RIGHT * 3 + DOWN * 1.2)
+        substitution_box = SurroundingRectangle(substitution, GOLD, stroke_width=1)
+        substitution.restore()
+
+        self.play(
+            AnimationGroup(
+                substitution.animate.scale(0.5).shift(RIGHT * 3 + DOWN * 1.2),
+                Create(substitution_box),
+                lag_ratio=0.7,
+                run_time=1,
+            )
+        )
+        self.play(Create(substitution_applied), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            TransformMatchingShapes(substitution_applied, integral_calc[4:6]),
+            run_time=0.7,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(Circumscribe(integral_calc[4][7:35]))
+        self.wait()
+        self.next_slide()
+
+        zero = MathTex("0")
+        zero.scale(0.8).next_to(integral_calc[4][5])
+        integral_results = [
+            MathTex(
+                r"&= I_{n-2} + \int^1_0 2 \pi ",
+                r"\, ",
+                r"\cos {2 \pi x} \, ",
+                r"\{ - {1 \over 2 \pi (n-1)} ",
+                r"\cos^{n-1} {2 \pi x} ",
+                r"\} ",
+                r"\> dx",
+            ),
+            MathTex(
+                r"&= I_{n-2} ",
+                r"+ ",
+                r"\int^1_0 ",
+                r"2 \pi ",
+                r"\{ - {1 \over 2 \pi (n-1)} ",
+                r"\} ",
+                r"\, ",
+                r"\cos {2 \pi x} \, ",
+                r"\cos^{n-1} {2 \pi x} ",
+                r"\> dx",
+            ),
+            MathTex(
+                r"&= I_{n-2} ",
+                r"+ ",
+                r"\int^1_0 ",
+                r"\{ ",
+                r"- ",
+                r"{1 \over n-1} ",
+                r"\} ",
+                r"\, ",
+                r"\cos {2 \pi x} \, ",
+                r"\cos^{n-1} {2 \pi x} ",
+                r"\> dx",
+            ),
+            MathTex(
+                r"&= I_{n-2} ",
+                r"- ",
+                r"{1 \over n-1} ",
+                r"\int^1_0 ",
+                r"\cos {2 \pi x} \, ",
+                r"\cos^{n-1} {2 \pi x} ",
+                r"\> dx",
+            ),
+            MathTex(
+                r"&= I_{n-2} ",
+                r"- ",
+                r"{1 \over n-1} ",
+                r"\int^1_0 ",
+                r"\cos^n {2 \pi x} ",
+                r"\> dx",
+            ),
+            MathTex(
+                r"&= I_{n-2} ",
+                r"- ",
+                r"{1 \over n-1} ",
+                r"I_n",
+            ),
+        ]
+        for i in integral_results:
+            i.scale(0.8).next_to(integral_calc[3], DOWN).align_to(
+                integral_calc[3], LEFT
+            )
+
+        self.play(ReplacementTransform(integral_calc[4][6:], zero))
+        self.play(FadeOut(integral_calc[4][5:], zero), run_time=0.4)
+        self.play(
+            TransformMatchingShapes(
+                VGroup(integral_calc[4][:5], integral_calc[5]),
+                integral_results[0],
+            ),
+            run_time=0.6,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            TransformMatchingTex(integral_results[0], integral_results[1]),
+            run_time=0.5,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            TransformMatchingTex(integral_results[1], integral_results[2]),
+            run_time=0.5,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            TransformMatchingTex(integral_results[2], integral_results[3]),
+            run_time=0.5,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            TransformMatchingShapes(integral_results[3], integral_results[4]),
+            run_time=0.5,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(Indicate(integral_results[4][3:]))
+        self.wait()
+        self.next_slide()
+
+        self.play(Indicate(integral_calc[1]))
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            TransformMatchingShapes(integral_results[4], integral_results[5]),
+            run_time=0.5,
+        )
+        self.wait()
+        self.next_slide()
+
+        result_old = integral_results[-1]
+        integral_results = [
+            MathTex(r"I_n &= I_{n-2} - {1 \over n-1} I_n", substrings_to_isolate=" "),
+            MathTex(r"I_n + {1 \over n-1} I_n &= I_{n-2}", substrings_to_isolate=" "),
+            MathTex(r"{n \over n-1} I_n &= I_{n-2}", substrings_to_isolate=" "),
+            MathTex(r"I_n &= {n-1 \over n} I_{n-2}", substrings_to_isolate=" "),
+        ]
+
+        integral_results[0].scale(0.8).align_to(integral_calc, LEFT).match_y(
+            integral_calc[0]
+        )
+        pos = integral_results[0].get_center()
+
+        self.play(
+            AnimationGroup(
+                FadeOut(integral_calc[1:4], substitution, substitution_box),
+                TransformMatchingShapes(
+                    VGroup(integral_calc[0], result_old),
+                    integral_results[0],
+                ),
+                lag_ratio=0.7,
+                run_time=0.8,
+            ),
+        )
+        self.wait(0.5)
+        self.play(integral_results[0].animate.scale(1.25).center())
+        self.wait()
+        self.next_slide()
+
+        self.remove(integral_calc)
+        self.play(
+            TransformMatchingTex(integral_results[0], integral_results[1]),
+            run_time=0.5,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            TransformMatchingTex(integral_results[1], integral_results[2]),
+            run_time=0.5,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            TransformMatchingTex(integral_results[2], integral_results[3]),
+            run_time=0.5,
+        )
+        self.wait()
+        self.next_slide()
+
+        self.play(integral_results[3].animate.scale(0.8).move_to(pos))
+        integral_1_2.generate_target()
+        integral_1_2.target.scale(1.25)
+
+        I_3 = MathTex(r"I_3 = 0")
+        I_4 = MathTex(r"I_4 = {3 \cdot 1 \over 4 \cdot 2}")
+        I_5 = MathTex(r"I_5 = 0")
+        I_6 = MathTex(r"I_6 = {5 \cdot 3 \cdot 1 \over 6 \cdot 4 \cdot 2}")
+        I_7 = MathTex(r"I_7 = 0")
+        I_8 = MathTex(
+            r"I_8 = {7 \cdot 5 \cdot 3 \cdot 1 \over 8 \cdot 6 \cdot 4 \cdot 2}"
+        )
+
+        VGroup(
+            integral_1_2.target[0], I_3, I_5, I_7, integral_1_2.target[1], I_4, I_6, I_8
+        ).arrange_in_grid(
+            rows=2, col_widths=[2.5] * 4, buff=(0.25, 0.75), cell_alignment=LEFT
+        ).center().shift(
+            DOWN * 0.5
+        )
+
+        self.play(MoveToTarget(integral_1_2))
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            AnimationGroup(
+                Write(I_3),
+                Write(I_5),
+                Write(I_7),
+                lag_ratio=0.8,
+            )
+        )
+        self.wait()
+        self.next_slide()
+        self.play(
+            AnimationGroup(
+                Write(I_4),
+                Write(I_6),
+                Write(I_8),
+                lag_ratio=0.8,
+            )
+        )
         self.wait()
         self.next_slide()
 

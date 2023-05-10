@@ -80,8 +80,9 @@ def main():
     scenes = "Integral"
     output = "slides.html"
     verbosity = "info"
+    quality = "l"
     command = (
-        f"manim -ql -v {verbosity} --progress_bar display slides.py {scenes} && "
+        f"manim -q{quality} -v {verbosity} --progress_bar display slides.py {scenes} && "
         f"manim-slides convert {scenes} {output}"
     )
 
