@@ -49,16 +49,21 @@ class Intro(Slide):
         self.next_slide()
 
         # <Overview>
-        self.clear()
+        self.play(FadeOut(title), run_time=0.5)
         self.wait()
         self.next_slide()
 
         overview_text = Text("Overview").scale(1).center().shift(UP * 3)
 
-        overview_rectangle_style = (WHITE, 2.5, 4.5)
+        overview_rectangle_style = {
+            "color": WHITE,
+            "height": 2.5,
+            "width": 4.5,
+            "stroke_width": 1,
+        }
         overview_imgs = (
             Group(
-                Rectangle(*overview_rectangle_style).add(
+                Rectangle(**overview_rectangle_style).add(
                     Tex(
                         r"0 \cdot 4 + 1 \cdot 0 + 2 \cdot 4 \rightarrow {_8C_4 \cdot _4C_0 \cdot _4C_4} \\ "
                         r"0 \cdot 3 + 1 \cdot 2 + 2 \cdot 3 \rightarrow {_8C_3 \cdot _5C_2 \cdot _3C_3} \\ "
@@ -67,20 +72,20 @@ class Intro(Slide):
                         tex_environment="gather*",
                     ).scale(0.5)
                 ),
-                Rectangle(*overview_rectangle_style).add(
+                Rectangle(**overview_rectangle_style).add(
                     MathTex(
                         r"&f(x) = (1+x+x^2)^8 \\ "
                         r"=& \; c_0 + c_1 \cdot x + c_2 \cdot x^2 + \cdots  \\ "
                         r"&+ c_8 \cdot x^8 + \cdots + c_{16} \cdot x^{16}",
                     ).scale(0.65)
                 ),
-                Rectangle(*overview_rectangle_style).add(
+                Rectangle(**overview_rectangle_style).add(
                     MathTex(
-                        r"c_8 =& {1 \over n}{\sum^{n-1}_{k=0} f(e^{2 k \pi i k \over n})e^{- 8 \cdot {2 k \pi i k \over n}}} \\"
+                        r"c_8 =& {1 \over n}{\sum^{n-1}_{k=0} f(e^{2 k \pi i k \over n})e^{- {16 k \pi i k \over n}}} \\"
                         r"=& {1 \over n}{\sum^{n-1}_{k=0} (1 + 2\cos{2 k \pi \over n})^8}",
                     ).scale(0.6)
                 ),
-                Rectangle(*overview_rectangle_style).add(
+                Rectangle(**overview_rectangle_style).add(
                     MathTex(
                         r"&\lim_{n \to \infty} {1 \over n}{\sum^{n-1}_{k=0} (1 + 2\cos{2 k \pi \over n})^8} \\ "
                         r"=& \sum^{8}_{k=0} {_8C_k} 2^k \int^1_0 \cos^k{2 \pi x} \> dx ",
@@ -96,15 +101,27 @@ class Intro(Slide):
             .shift(DOWN * 0.7)
         )
 
-        # TODO Add highlights and animations
-
         # Highlight a_8
         overview_imgs[1].submobjects[0][0][33:35].set_color(color=BLUE)
         overview_imgs[2].submobjects[0][0][0:2].set_color(color=BLUE)
 
-        self.add(overview_text)
-        self.add(overview_imgs)
+        self.play(FadeIn(overview_text, scale=0.8), run_time=0.7)
+        self.wait()
+        self.next_slide()
 
+        self.play(Create(overview_imgs[0]), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
+        self.play(Create(overview_imgs[1]), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
+        self.play(Create(overview_imgs[2]), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
+        self.play(Create(overview_imgs[3]), run_time=0.7)
         self.wait()
         self.next_slide()
 
@@ -194,7 +211,7 @@ class Intro(Slide):
             AnimationGroup(
                 *(Create(i) for i in solution2),
                 lag_ratio=1,
-                run_time=2,
+                run_time=1,
             )
         )
         self.play(solution2.animate.shift(UP * 0.4), run_time=0.3)
@@ -202,10 +219,10 @@ class Intro(Slide):
         self.next_slide()
 
         solution3 = MathTex(*solution3_strings).shift(DOWN)
-        self.play(Transform(solution2[0][1].copy(), solution3[0]))
+        self.play(Transform(solution2[0][1].copy(), solution3[0]), run_time=0.8)
         self.wait()
         self.next_slide()
-        self.play(Transform(solution2[1][0].copy(), solution3[1:3]))
+        self.play(Transform(solution2[1][0].copy(), solution3[1:3]), run_time=0.8)
         self.wait()
         self.next_slide()
 
@@ -219,13 +236,13 @@ class Intro(Slide):
                     solution2[3 * i + 1][0].copy(), solution3[4 * i + 1 : 4 * i + 3]
                 )
             )
-        self.play(AnimationGroup(*transforms, lag_ratio=0.3))
+        self.play(AnimationGroup(*transforms, lag_ratio=0.3, run_time=1.5))
         self.wait()
         self.next_slide()
 
         answer = MathTex("= 1107")
         answer.scale(1.2).next_to(solution3, DOWN, buff=1)
-        self.play(Create(answer))
+        self.play(Create(answer), run_time=1)
         self.wait()
         self.next_slide()
 
@@ -296,13 +313,7 @@ class Polynomial(Slide):
         self.wait()
         self.next_slide()
 
-        self.play(
-            AnimationGroup(
-                Indicate(polynomial[1][0]),
-                FadeOut(x0_tex, x1_tex),
-                lag_ratio=0.3,
-            )
-        )
+        self.play(Indicate(polynomial[1][0]))
         self.wait()
         self.next_slide()
 
@@ -312,7 +323,13 @@ class Polynomial(Slide):
             r"\cdots",
             "(1+x+x^2)",
         ).shift(UP)
-        self.play(polynomial.animate.scale(0.8).shift(UP * 1.5))
+        self.play(
+            AnimationGroup(
+                FadeOut(x0_tex, x1_tex),
+                polynomial.animate.scale(0.8).shift(UP * 1.5),
+                lag_ratio=0.5,
+            )
+        )
         self.play(TransformMatchingTex(polynomial, expansion1))
         self.wait()
         self.next_slide()
@@ -333,9 +350,9 @@ class Polynomial(Slide):
         a1_group = Group(a1_choice, arrow1, a1)
         a1_group.arrange(DOWN)
         a1_group.next_to(expansion1[0][1], DOWN)
+        self.play(Indicate(expansion1[0]))
         self.play(
             AnimationGroup(
-                Indicate(expansion1[0]),
                 ReplacementTransform(expansion1[0][1].copy(), a1_choice),
                 Create(arrow1),
                 Create(a1),
@@ -357,9 +374,9 @@ class Polynomial(Slide):
         a2_group = Group(a2_choice, arrow2, a2)
         a2_group.arrange(DOWN)
         a2_group.next_to(expansion1[1][3], DOWN)
+        self.play(Indicate(expansion1[1]))
         self.play(
             AnimationGroup(
-                Indicate(expansion1[1]),
                 ReplacementTransform(expansion1[1][3].copy(), a2_choice),
                 Create(arrow2),
                 Create(a2),
@@ -719,6 +736,7 @@ class ComplexTrigonometry(Slide):
             TransformMatchingTex(complex_mult, complex_mult_subs),
             TransformMatchingTex(complex_mult_result, complex_mult_subs),
             TransformMatchingTex(substitution, complex_mult_subs),
+            run_time=0.9,
         )
         self.wait()
         self.next_slide()
@@ -1242,7 +1260,7 @@ class Integral(Slide):
         VGroup(
             integral_1_2.target[0], I_3, I_5, I_7, integral_1_2.target[1], I_4, I_6, I_8
         ).arrange_in_grid(
-            rows=2, col_widths=[2.5] * 4, buff=(0.25, 0.75), cell_alignment=LEFT
+            rows=2, col_widths=[2.5] * 4, buff=(0.5, 0.75), cell_alignment=LEFT
         ).center().shift(
             DOWN * 0.5
         )
