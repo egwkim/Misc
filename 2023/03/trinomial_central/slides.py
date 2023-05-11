@@ -59,7 +59,7 @@ class Intro(Slide):
             "color": WHITE,
             "height": 2.5,
             "width": 4.5,
-            "stroke_width": 1,
+            "stroke_width": 1.5,
         }
         overview_imgs = (
             Group(
@@ -101,7 +101,7 @@ class Intro(Slide):
             .shift(DOWN * 0.7)
         )
 
-        # Highlight a_8
+        # Highlight c_8
         overview_imgs[1].submobjects[0][0][33:35].set_color(color=BLUE)
         overview_imgs[2].submobjects[0][0][0:2].set_color(color=BLUE)
 
@@ -109,27 +109,27 @@ class Intro(Slide):
         self.wait()
         self.next_slide()
 
-        self.play(Create(overview_imgs[0]), run_time=0.7)
+        self.play(FadeIn(overview_imgs[0], scale=0.9), run_time=0.7)
         self.wait()
         self.next_slide()
 
-        self.play(Create(overview_imgs[1]), run_time=0.7)
+        self.play(FadeIn(overview_imgs[1], scale=0.9), run_time=0.7)
         self.wait()
         self.next_slide()
 
-        self.play(Create(overview_imgs[2]), run_time=0.7)
+        self.play(FadeIn(overview_imgs[2], scale=0.9), run_time=0.7)
         self.wait()
         self.next_slide()
 
-        self.play(Create(overview_imgs[3]), run_time=0.7)
+        self.play(FadeIn(overview_imgs[3], scale=0.9), run_time=0.7)
+        self.wait()
+        self.next_slide()
+
+        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
         self.wait()
         self.next_slide()
 
         # <Problem introduction>
-        self.clear()
-        self.wait()
-        self.next_slide()
-
         problem = Group(
             Group(
                 Text("8개의 정수"),
@@ -148,46 +148,46 @@ class Intro(Slide):
 
         self.play(
             AnimationGroup(
-                *[Create(text) for text in problem[0]], lag_ratio=1, run_time=0.3
+                *[Write(text) for text in problem[0]], lag_ratio=1, run_time=0.25
             )
         )
         self.wait()
         self.next_slide()
         self.play(
             AnimationGroup(
-                *[Create(text) for text in problem[1]], lag_ratio=1, run_time=0.3
+                *[Write(text) for text in problem[1]], lag_ratio=1, run_time=0.25
             )
         )
         self.wait()
         self.next_slide()
         self.play(
             AnimationGroup(
-                *[Create(text) for text in problem[2]], lag_ratio=1, run_time=0.3
+                *[Write(text) for text in problem[2]], lag_ratio=1, run_time=0.25
             )
         )
+        self.wait()
+        self.next_slide()
+
+        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
         self.wait()
         self.next_slide()
 
         # <Solution>
-        self.clear()
-        self.wait()
-        self.next_slide()
-
         solution1_1 = MathTex("x")
         solution1_2 = MathTex("x", r", \; ", "y")
         solution1_3 = MathTex("x", r" + 2 ", "y", " = 8")
-        self.play(Create(solution1_1), run_time=0.5)
+        self.play(Create(solution1_1), run_time=0.2)
         self.wait()
         self.next_slide()
         self.play(
             ReplacementTransform(solution1_1, solution1_2),
-            run_time=0.5,
+            run_time=0.4,
         )
         self.wait()
         self.next_slide()
         self.play(
             TransformMatchingTex(solution1_2, solution1_3),
-            run_time=0.5,
+            run_time=0.4,
         )
         self.wait()
         self.next_slide()
@@ -205,7 +205,7 @@ class Intro(Slide):
         solution2_strings.pop()
         solution3_strings.pop()
 
-        solution2 = MathTex(*solution2_strings)
+        solution2 = MathTex(*solution2_strings).shift(UP * 0.4)
         self.play(solution1_3.animate.shift(UP * 2), run_time=0.5)
         self.play(
             AnimationGroup(
@@ -214,20 +214,33 @@ class Intro(Slide):
                 run_time=1,
             )
         )
-        self.play(solution2.animate.shift(UP * 0.4), run_time=0.3)
         self.wait()
         self.next_slide()
 
         solution3 = MathTex(*solution3_strings).shift(DOWN)
-        self.play(Transform(solution2[0][1].copy(), solution3[0]), run_time=0.8)
+        self.play(Indicate(solution2[6:8]))
         self.wait()
         self.next_slide()
-        self.play(Transform(solution2[1][0].copy(), solution3[1:3]), run_time=0.8)
+
+        self.play(Transform(solution2[6][1].copy(), solution3[8]), run_time=0.8)
+        self.wait()
+        self.next_slide()
+
+        self.play(Transform(solution2[7][0].copy(), solution3[9:11]), run_time=0.8)
         self.wait()
         self.next_slide()
 
         transforms = []
-        for i in range(1, 5):
+        for i in [0, 1]:
+            transforms.append(
+                Transform(solution2[3 * i][1].copy(), solution3[4 * i : 4 * i + 2])
+            )
+            transforms.append(
+                Transform(
+                    solution2[3 * i + 1][0].copy(), solution3[4 * i + 2 : 4 * i + 4]
+                )
+            )
+        for i in [3, 4]:
             transforms.append(
                 Transform(solution2[3 * i][1].copy(), solution3[4 * i - 1 : 4 * i + 1])
             )
@@ -242,7 +255,7 @@ class Intro(Slide):
 
         answer = MathTex("= 1107")
         answer.scale(1.2).next_to(solution3, DOWN, buff=1)
-        self.play(Create(answer), run_time=1)
+        self.play(Write(answer), run_time=0.7)
         self.wait()
         self.next_slide()
 
@@ -435,13 +448,20 @@ class Polynomial(Slide):
         self.next_slide()
 
         polynomial.shift(UP * 1.5, LEFT * 4)
-        choices = [0, 1, 1, 2, 2, 1, 0, 1]
+        choices = [
+            [0, 1, 1, 2, 2, 1, 0, 1],
+            [0, 0, 0, 2, 1, 0, 1, 2],
+            [0, 2, 0, 0, 2, 1, 2, 0],
+            [0, 1, 1, 2, 2, 1, 1, 1],
+            [1, 2, 1, 0, 2, 2, 1, 2],
+            [0, 1, 1, 2, 0, 2, 0, 2],
+        ]
         multiplication = MathTex(
             "1",
             r" \cdot ",
             "x",
             r" \cdot ",
-            r" \cdot ".join(["1", "x", "x^2"][i] for i in choices[2:7]),
+            r" \cdot ".join(["1", "x", "x^2"][i] for i in choices[0][2:7]),
             r" \cdot ",
             "x",
         )
@@ -450,7 +470,7 @@ class Polynomial(Slide):
             "+",
             "1",
             "+",
-            "+".join(str(i) for i in choices[2:7]),
+            "+".join(str(i) for i in choices[0][2:7]),
             "+",
             "1",
         )
@@ -488,10 +508,10 @@ class Polynomial(Slide):
         self.next_slide()
 
         anim1, multiplication = tex_append_animation(
-            multiplication, f" = x^{sum(choices)}", return_new_tex=True
+            multiplication, f" = x^{sum(choices[0])}", return_new_tex=True
         )
         anim2, a_sum = tex_append_animation(
-            a_sum, f" = {sum(choices)}", return_new_tex=True
+            a_sum, f" = {sum(choices[0])}", return_new_tex=True
         )
         self.play(anim1, anim2)
         self.wait()
@@ -507,6 +527,33 @@ class Polynomial(Slide):
         self.wait()
         self.next_slide()
 
+        multiplications = [
+            MathTex(
+                r" \cdot ".join(["1", "x", "x^2"][i] for i in choices[j]),
+                r" = x^{" + str(sum(choices[j])) + r"}",
+            ).move_to(multiplication)
+            for j in range(1, len(choices))
+        ]
+        a_sums = [
+            MathTex(
+                "+".join(str(i) for i in choices[j]),
+                rf" = {sum(choices[j])}",
+            ).move_to(a_sum)
+            for j in range(1, len(choices))
+        ]
+
+        self.remove(multiplication, a_sum)
+
+        for i in range(len(multiplications) - 1):
+            self.add(multiplications[i], a_sums[i])
+            self.wait()
+            self.next_slide()
+            self.remove(multiplications[i], a_sums[i])
+
+        self.add(multiplications[-1], a_sums[-1])
+        self.wait()
+        self.next_slide()
+
         expansion2 = (
             MathTex(
                 r"= c_0 + c_1 \cdot x + \cdots + ",
@@ -519,7 +566,7 @@ class Polynomial(Slide):
         )
         self.play(
             AnimationGroup(
-                FadeOut(multiplication, a_sum),
+                FadeOut(multiplications[-1], a_sums[-1]),
                 polynomial.animate.shift(DOWN + RIGHT * 0.8),
                 Create(expansion2),
                 lag_ratio=0.7,
@@ -879,7 +926,7 @@ class ComplexTrigonometry(Slide):
 
             return objs, displayed_mobjs
 
-        alpha = PI / 6
+        alpha = PI * 3 / 17
         alpha_objs, alpha_mobjs = create_point_on_unit_circle(
             alpha, r"\alpha", 0.25, RED
         )
@@ -906,7 +953,7 @@ class ComplexTrigonometry(Slide):
         self.wait()
         self.next_slide()
 
-        beta = PI * 3 / 4
+        beta = PI * 7 / 11
         beta_objs, beta_mobjs = create_point_on_unit_circle(beta, r"\beta", 0.225, BLUE)
         self.wait()
         self.next_slide()
@@ -918,15 +965,75 @@ class ComplexTrigonometry(Slide):
         self.wait()
         self.next_slide()
 
-        self.play(
-            AnimationGroup(FadeOut(*alpha_mobjs, *beta_mobjs, *angle_sum_mobjs)),
-            FadeOut(unit_circle),
-            lag_ratio=0.7,
-        )
+        self.play(AnimationGroup(FadeOut(*beta_mobjs, *angle_sum_mobjs)))
         self.wait()
         self.next_slide()
 
-        # TODO
+        alpha_mobjs.append(MathTex(" = z").scale(0.7).next_to(alpha_objs["label"]))
+        self.play(Write(alpha_mobjs[-1]))
+        self.wait()
+        self.next_slide()
+        
+        # TODO Add tex \alpha to copied arcs
+        alpha_double = {
+            "segment": alpha_objs["segment"].copy(),
+            "circle": alpha_objs["circle"].copy(),
+            "arc": alpha_objs["arc"].copy(),
+        }
+        self.play(
+            AnimationGroup(
+                *[
+                    Rotate(alpha_double[key], angle=alpha, about_point=plane.n2p(0))
+                    for key in ["segment", "circle", "arc"]
+                ]
+            )
+        )
+        alpha_double["label"] = (
+            MathTex(r"z ^ 2")
+            .scale(0.7)
+            .next_to(alpha_double["segment"], alpha_double["segment"].get_center(), 0.2)
+        )
+        self.play(Write(alpha_double["label"]))
+        self.wait()
+        self.next_slide()
+
+        alpha_triple = {
+            "segment": alpha_objs["segment"].copy(),
+            "circle": alpha_objs["circle"].copy(),
+            "arc": alpha_objs["arc"].copy(),
+        }
+        self.play(
+            AnimationGroup(
+                *[
+                    Rotate(alpha_triple[key], angle=2 * alpha, about_point=plane.n2p(0))
+                    for key in ["segment", "circle", "arc"]
+                ]
+            )
+        )
+        alpha_triple["label"] = (
+            MathTex(r"z ^ 3")
+            .scale(0.7)
+            .next_to(alpha_triple["segment"], alpha_triple["segment"].get_center(), 0.2)
+        )
+        self.play(Write(alpha_triple["label"]))
+        self.wait()
+        self.next_slide()
+
+        equation = MathTex("x^n = 1")
+        equation.scale(0.9).shift(RIGHT * 4 + UP * 3)
+        self.play(Write(equation), run_time=0.4)
+        self.wait()
+        self.next_slide()
+
+        self.play(
+            *[FadeOut(i) for i in alpha_mobjs],
+            *[FadeOut(i) for _, i in alpha_double.items()],
+            *[FadeOut(i) for _, i in alpha_triple.items()],
+        )
+        self.wait()
+        self.next_slide()
+        
+        # TODO Add animations for nth roots of unity
 
         self.play(*[FadeOut(mob) for mob in self.mobjects])
         self.wait()
