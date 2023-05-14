@@ -596,7 +596,7 @@ class ComplexTrigonometry(Slide):
 
     def construct(self):
         polynomial = MathTex("f(x) = ax + b")
-        self.play(Create(polynomial))
+        self.play(Write(polynomial), run_time=0.7)
         self.wait()
         self.next_slide()
 
@@ -604,7 +604,7 @@ class ComplexTrigonometry(Slide):
             AnimationGroup(
                 Circumscribe(polynomial[0][5]),
                 Circumscribe(polynomial[0][8]),
-                lag_ratio=0.2,
+                lag_ratio=0.3,
             )
         )
         self.wait()
@@ -617,7 +617,7 @@ class ComplexTrigonometry(Slide):
         self.play(
             polynomial.animate.shift(UP),
         )
-        self.play(animate_submobjects(values, Create, lag_ratio=0.5, run_time=0.8))
+        self.play(animate_submobjects(values, Write, lag_ratio=0.5, run_time=0.8))
         self.wait()
         self.next_slide()
 
@@ -662,10 +662,10 @@ class ComplexTrigonometry(Slide):
         self.wait()
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
 
         polynomial = MathTex("f(x) = ax^3 + bx^2 + cx + d")
-        self.play(FadeIn(polynomial))
+        self.play(FadeIn(polynomial), run_time=0.5)
         self.wait()
         self.next_slide()
 
@@ -690,7 +690,7 @@ class ComplexTrigonometry(Slide):
         self.play(
             AnimationGroup(
                 polynomial.animate.shift(UP * 2),
-                animate_submobjects(values, Create, lag_ratio=0.5),
+                animate_submobjects(values, Write, lag_ratio=0.5, run_time=1.5),
                 lag_ratio=0.8,
             )
         )
@@ -700,14 +700,14 @@ class ComplexTrigonometry(Slide):
         self.play(
             AnimationGroup(
                 values.animate.shift(LEFT * 3.7).scale(0.9),
-                animate_submobjects(coeffs, Create, lag_ratio=0.5),
-                lag_ratio=0.8,
+                animate_submobjects(coeffs, Write, lag_ratio=0.5, run_time=2),
+                lag_ratio=0.7,
             )
         )
         self.wait()
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.6)
         self.wait()
         self.next_slide()
 
@@ -833,26 +833,27 @@ class ComplexTrigonometry(Slide):
         self.wait()
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
         self.wait()
         self.next_slide()
 
         plane = ComplexPlane(
-            x_range=(-2.4, 2.4, 1),
-            y_range=(-1.5, 1.5, 1),
-            x_length=12,
-            y_length=7.5,
+            x_range=(-2.88, 2.88, 1),
+            y_range=(-1.6, 1.6, 1),
+            x_length=14.4,
+            y_length=8,
             faded_line_ratio=4,
-            axis_config={"include_numbers": True},
         )
         coord_labels = plane.get_coordinate_labels()
+        
+        # TODO Add more description about complex number arithmetic and complex plane.
 
         unit_circle = Circle.from_three_points(
             *(plane.n2p(1), plane.n2p(-1), plane.n2p(1j)),
             color=GREEN,
         )
 
-        self.play(FadeIn(plane, coord_labels))
+        self.play(FadeIn(plane, coord_labels), run_time=0.6)
         self.wait()
         self.next_slide()
 
@@ -869,7 +870,7 @@ class ComplexTrigonometry(Slide):
         ):
             objs = {}
             objs["point"] = unit_circle.point_at_angle(angle)
-            objs["circle"] = Circle(0.08, color=color, fill_opacity=1)
+            objs["circle"] = Circle(0.07, color=color, fill_opacity=1)
             objs["label"] = MathTex(rf"\cos {text} + i \sin {text}")
             objs["label"].scale(0.7).next_to(objs["point"], objs["point"], 0.1)
 
@@ -882,9 +883,7 @@ class ComplexTrigonometry(Slide):
             text_anim = Wait(run_time=0)
             if angle_text:
                 objs["text"] = MathTex(text)
-                objs["text"].scale(0.6).next_to(
-                    plane.n2p(0), unit_circle.point_at_angle(angle / 2), 0.3
-                )
+                objs["text"].scale(0.6).move_to(plane.pr2pt(0.32, angle * 0.5))
                 text_anim = Write(objs["text"])
 
             objs["circle"].move_to(plane.n2p(1)).set_z_index(1)
@@ -973,8 +972,7 @@ class ComplexTrigonometry(Slide):
         self.play(Write(alpha_mobjs[-1]))
         self.wait()
         self.next_slide()
-        
-        # TODO Add tex \alpha to copied arcs
+
         alpha_double = {
             "segment": alpha_objs["segment"].copy(),
             "circle": alpha_objs["circle"].copy(),
@@ -993,7 +991,10 @@ class ComplexTrigonometry(Slide):
             .scale(0.7)
             .next_to(alpha_double["segment"], alpha_double["segment"].get_center(), 0.2)
         )
-        self.play(Write(alpha_double["label"]))
+        alpha_double["text"] = (
+            MathTex(r"\alpha").scale(0.6).move_to(plane.pr2pt(0.32, alpha * 1.5))
+        )
+        self.play(Write(alpha_double["label"]), Write(alpha_double["text"]))
         self.wait()
         self.next_slide()
 
@@ -1015,12 +1016,15 @@ class ComplexTrigonometry(Slide):
             .scale(0.7)
             .next_to(alpha_triple["segment"], alpha_triple["segment"].get_center(), 0.2)
         )
-        self.play(Write(alpha_triple["label"]))
+        alpha_triple["text"] = (
+            MathTex(r"\alpha").scale(0.6).move_to(plane.pr2pt(0.32, alpha * 2.5))
+        )
+        self.play(Write(alpha_triple["label"]), Write(alpha_triple["text"]))
         self.wait()
         self.next_slide()
 
         equation = MathTex("x^n = 1")
-        equation.scale(0.9).shift(RIGHT * 4 + UP * 3)
+        equation.scale(0.9).shift(RIGHT * 4.5 + UP * 3)
         self.play(Write(equation), run_time=0.4)
         self.wait()
         self.next_slide()
@@ -1029,13 +1033,398 @@ class ComplexTrigonometry(Slide):
             *[FadeOut(i) for i in alpha_mobjs],
             *[FadeOut(i) for _, i in alpha_double.items()],
             *[FadeOut(i) for _, i in alpha_triple.items()],
+            run_time=0.5,
+        )
+
+        plane.generate_target()
+        plane.target = ComplexPlane(
+            x_range=(-1.2, 1.2, 1),
+            y_range=(-1.2, 1.2, 1),
+            x_length=4,
+            y_length=4,
+            faded_line_ratio=4,
+        ).shift(LEFT * 3.8)
+        coord_labels.generate_target()
+        coord_labels.target = plane.target.get_coordinate_labels()
+        unit_circle.generate_target()
+        unit_circle.target = Circle.from_three_points(
+            *(plane.target.n2p(1), plane.target.n2p(-1), plane.target.n2p(1j)),
+            color=GREEN,
+        )
+        self.play(
+            ReplacementTransform(plane, plane.target),
+            MoveToTarget(coord_labels),
+            MoveToTarget(unit_circle),
+            equation.animate.shift(LEFT * 4.5, DOWN),
+        )
+        plane = plane.target
+
+        self.wait()
+        self.next_slide()
+
+        n = 6
+        root_points = [
+            Circle(0.07, YELLOW, fill_opacity=1).move_to(
+                unit_circle.point_at_angle(2 * PI * i / n)
+            )
+            for i in range(n)
+        ]
+        root_segments = [
+            Line(plane.n2p(0), unit_circle.point_at_angle(2 * PI * i / n))
+            for i in range(n)
+        ]
+        self.play(
+            *[FadeIn(i) for i in concatenate_lists(root_segments, root_points)],
+            run_time=0.5,
         )
         self.wait()
         self.next_slide()
-        
-        # TODO Add animations for nth roots of unity
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        roots_tex = MathTex(r"\cos {2 \pi m \over n} + i \sin {2 \pi m \over n}")
+        roots_tex.scale(0.7).next_to(equation, DOWN, 0.8).align_to(equation, LEFT)
+        self.play(Write(roots_tex), run_time=0.5)
+        self.wait()
+        self.next_slide()
+
+        roots_tex_2 = MathTex(
+            r"&(",
+            r"\cos {2 \pi m \over n} + i \sin {2 \pi m \over n}",
+            r")",
+            r"^n \\ ",
+            r"&= \cos {2 \pi m} + i \sin {2 \pi m} \\ ",
+            r"&= 1",
+        )
+        roots_tex_2.scale(0.7).next_to(equation, DOWN, 0.8).align_to(equation, LEFT)
+        self.play(TransformMatchingTex(roots_tex, roots_tex_2))
+        self.wait()
+        self.next_slide()
+
+        roots_sum = MathTex(
+            r"S_k = ",
+            r"\sum^{n-1}_{m=0}",
+            r"&(",
+            r"\cos {2 \pi m \over n} + i \sin {2 \pi m \over n}",
+            r")",
+            r"^k",
+            r"\qquad (k \ge 0)",
+        ).scale(0.7)
+        roots_sum.align_to(roots_tex_2, UL).align_to(equation, LEFT)
+        self.play(TransformMatchingTex(roots_tex_2, roots_sum))
+        self.wait()
+        self.next_slide()
+
+        roots_sum_result = MathTex(
+            r"S_k = {\begin{cases} n & (k = 0, n, 2n, 3n, \cdots) \\ 0 & (otherwise) \end{cases}}",
+        )
+        (
+            roots_sum_result.scale(0.7)
+            .next_to(roots_sum, DOWN, 0.6)
+            .align_to(roots_sum, LEFT)
+        )
+        self.play(Write(roots_sum_result), run_time=1)
+        self.wait()
+        self.next_slide()
+
+        k_tex = MathTex("k = 1")
+        avg_point = Circle(0.08, BLUE, fill_opacity=1).move_to(plane.n2p(0))
+        k_tex.scale(0.7).next_to(plane, DOWN, 0.8)
+        self.play(FadeIn(k_tex), run_time=0.3)
+        self.wait()
+        self.next_slide()
+
+        self.play(FadeIn(avg_point), run_time=0.2)
+        self.wait()
+        self.next_slide()
+        self.play(FadeOut(avg_point), run_time=0.2)
+        self.wait()
+        self.next_slide()
+
+        k_tex.generate_target()
+        for i in range(2, 7):
+            k_tex.target = MathTex(f"k = {i}")
+            k_tex.target.scale(0.7).move_to(k_tex)
+            self.play(ReplacementTransform(k_tex, k_tex.target), run_time=0.4)
+            k_tex = k_tex.target
+            anim = []
+            for j in range(n):
+                anim.append(
+                    Rotate(root_points[j], 2 * PI * j / n, about_point=plane.n2p(0))
+                )
+                anim.append(
+                    Rotate(root_segments[j], 2 * PI * j / n, about_point=plane.n2p(0))
+                )
+            self.play(*anim, run_time=2.5)
+            self.wait()
+            self.next_slide()
+
+            if i == 6:
+                avg_point.move_to(plane.n2p(1))
+            self.play(FadeIn(avg_point), run_time=0.2)
+            self.wait()
+            self.next_slide()
+            self.play(FadeOut(avg_point), run_time=0.2)
+            self.wait()
+            self.next_slide()
+
+        self.play(
+            Unwrite(equation),
+            Unwrite(roots_sum),
+            Unwrite(roots_sum_result),
+            Unwrite(k_tex),
+            Unwrite(coord_labels),
+            FadeOut(plane, unit_circle, *root_points, *root_segments),
+            run_time=0.6,
+        )
+        self.wait(0.2)
+        polynomial.shift(UP)
+        self.play(Write(polynomial), run_time=0.5)
+        self.wait()
+        self.next_slide()
+
+        z = MathTex(r"z = \cos {2 \pi \over 4} + i \sin {2 \pi \over 4}")
+        z.next_to(polynomial[0][4], DOWN, 0.8, submobject_to_align=z[0][1])
+        self.play(Write(z), run_time=0.6)
+        self.wait()
+        self.next_slide()
+
+        z_is_i = MathTex("\; ( = i)")
+        z_is_i.scale(0.8).next_to(z)
+        self.play(FadeIn(z_is_i), run_time=0.5)
+        self.wait()
+        self.next_slide()
+        self.play(FadeOut(z_is_i), run_time=0.5)
+        self.wait()
+        self.next_slide()
+
+        values = VGroup(
+            *[
+                MathTex(
+                    f"f(z^{i})",
+                    " = ",
+                    f"a (z^{i})^3",
+                    " + ",
+                    f"b (z^{i})^2",
+                    " + ",
+                    f"c (z^{i})^1",
+                    " + ",
+                    f"d (z^{i})^0",
+                )
+                for i in range(4)
+            ]
+        ).arrange(DOWN)
+        values.scale(0.8).next_to(z, DOWN, 0.7).set_x(0)
+        self.play(
+            AnimationGroup(*[Write(i) for i in values], lag_ratio=0.3, run_time=1)
+        )
+        self.wait()
+        self.next_slide()
+
+        line = Line(LEFT * 4.5, RIGHT * 4.5, stroke_width=1.5)
+        line.next_to(values, DOWN)
+        self.wait()
+        self.next_slide()
+
+        sum = MathTex(
+            r"\sum_{k=0}^3 f(z^k)",
+            " = ",
+            "0 a",
+            " + ",
+            "0 b",
+            " + ",
+            "0 c",
+            " + ",
+            "4 d",
+        )
+        sum.scale(0.8)
+        sum.next_to(values[-1][1], DOWN, 1.2, submobject_to_align=sum[1])
+        for i in range(2, 9):
+            sum[i].match_x(values[-1][i])
+        self.play(
+            AnimationGroup(
+                Create(line),
+                Write(sum),
+                lag_ratio=0.5,
+                run_time=1,
+            )
+        )
+        self.wait()
+        self.next_slide()
+
+        for i in range(4):
+            rect = SurroundingRectangle(
+                Group(*[values[j][2 * i + 2][1:] for j in range(4)]),
+                buff=0.05,
+            )
+            self.play(Create(rect), run_time=0.5)
+            self.wait()
+            self.next_slide()
+            self.play(Indicate(sum[2 * i + 2][0]))
+            self.wait()
+            self.next_slide()
+            self.play(FadeOut(rect), run_time=0.3)
+
+        self.wait()
+        self.next_slide()
+
+        values.generate_target()
+        values.target = VGroup(
+            *[
+                MathTex(
+                    f"z^{{-{i}}} f(z^{i})",
+                    " = ",
+                    f"a (z^{i})^2",
+                    " + ",
+                    f"b (z^{i})^1",
+                    " + ",
+                    f"c (z^{i})^0",
+                    " + ",
+                    f"d (z^{i})^{{-1}}",
+                )
+                for i in range(4)
+            ]
+        ).arrange(DOWN, index_of_submobject_to_align=1)
+        values.target.scale(0.8)
+        for i in range(4):
+            values.target[i].match_y(values[i])
+
+        # BUG Plus signs on the second row are not transforming correctly.
+        anim = []
+        for i, j in zip(values, values.target):
+            for l in [0, 1, 3, 5, 7]:
+                anim.append(TransformMatchingShapes(i[l], j[l]))
+            for l in [2, 4, 6, 8]:
+                anim.append(TransformMatchingShapes(i[l][:-1], j[l][:-1]))
+                anim.append(ReplacementTransform(i[l][-1], j[l][-1]))
+        self.play(*anim)
+        self.wait()
+        self.next_slide()
+
+        sum.generate_target()
+        sum.target = MathTex(
+            r"\sum_{k=0}^3 z^{-k} f(z^k)",
+            " = ",
+            "0 a",
+            " + ",
+            "0 b",
+            " + ",
+            "4 c",
+            " + ",
+            "0 d",
+        )
+        sum.target.scale(0.8)
+        sum.target.next_to(
+            values.target[-1][1], DOWN, 1.2, submobject_to_align=sum.target[1]
+        )
+        for i in range(2, 9):
+            sum.target[i].match_x(values.target[-1][i])
+        self.play(TransformMatchingShapes(sum, sum.target))
+        self.wait()
+        self.next_slide()
+
+        values = values.target
+        sum = sum.target
+
+        for i in range(4):
+            rect = SurroundingRectangle(
+                Group(*[values[j][2 * i + 2][1:] for j in range(4)]),
+                buff=0.05,
+            )
+            self.play(Create(rect), run_time=0.5)
+            self.wait()
+            self.next_slide()
+            self.play(Indicate(sum[2 * i + 2][0]))
+            self.wait()
+            self.next_slide()
+            self.play(FadeOut(rect), run_time=0.3)
+        self.wait()
+        self.next_slide()
+
+        for k in (2, 3):
+            values.generate_target()
+            values.target = VGroup(
+                *[
+                    MathTex(
+                        f"(z^{{-{i}}})^{k} f(z^{i})",
+                        " = ",
+                        f"a (z^{i})^{{{3-k}}}",
+                        " + ",
+                        f"b (z^{i})^{{{2-k}}}",
+                        " + ",
+                        f"c (z^{i})^{{{1-k}}}",
+                        " + ",
+                        f"d (z^{i})^{{{-k}}}",
+                    )
+                    for i in range(4)
+                ]
+            ).arrange(DOWN, index_of_submobject_to_align=1)
+            values.target.scale(0.8)
+            for i in range(4):
+                values.target[i].match_y(values[i])
+            anim = []
+            for i, j in zip(values, values.target):
+                if k < 3:
+                    anim.append(TransformMatchingShapes(i[0], j[0]))
+                else:
+                    anim.append(TransformMatchingShapes(i[0][:5], j[0][:5]))
+                    anim.append(Transform(i[0][5], j[0][5]))
+                    anim.append(TransformMatchingShapes(i[0][6:], j[0][6:]))
+                for l in [1, 3, 5, 7]:
+                    anim.append(TransformMatchingShapes(i[l], j[l]))
+                for l in [2, 4, 6, 8]:
+                    anim.append(TransformMatchingShapes(i[l][:-1], j[l][:-1]))
+                    anim.append(ReplacementTransform(i[l][-1], j[l][-1]))
+
+            sum.generate_target()
+            sum.target = MathTex(
+                rf"\sum_{{k=0}}^3 (z^{{-k}})^{k} f(z^k)",
+                " = ",
+                f"{(k-2)*4} a",
+                " + ",
+                f"{(3-k)*4} b",
+                " + ",
+                "0 c",
+                " + ",
+                "0 d",
+            )
+            sum.target.scale(0.8)
+            sum.target.next_to(
+                values.target[-1][1], DOWN, 1.2, submobject_to_align=sum.target[1]
+            )
+            for i in range(2, 9):
+                sum.target[i].match_x(values.target[-1][i])
+            if k < 3:
+                anim.append(TransformMatchingShapes(sum, sum.target))
+            else:
+                anim += [
+                    TransformMatchingShapes(sum[0][:10], sum.target[0][:10]),
+                    Transform(sum[0][10], sum.target[0][10]),
+                    TransformMatchingShapes(sum[0][11:], sum.target[0][11:]),
+                    TransformMatchingShapes(sum[1:], sum.target[1:]),
+                ]
+            self.play(*anim)
+            self.wait()
+            self.next_slide()
+
+            values = values.target
+            sum = sum.target
+
+            rect = SurroundingRectangle(
+                Group(*[values[j][8 - 2 * k][1:] for j in range(4)]),
+                buff=0.05,
+            )
+            self.play(
+                AnimationGroup(
+                    Create(rect),
+                    Indicate(sum[8 - 2 * k][0]),
+                    run_time=1,
+                    lag_ratio=0.7,
+                )
+            )
+            self.play(FadeOut(rect), run_time=0.3)
+            self.wait()
+            self.next_slide()
+
+        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.8)
         self.wait()
         self.next_slide()
 
@@ -1046,6 +1435,9 @@ class ValueToCoeff(Slide):
     """
 
     def construct(self):
+        polynomial = MathTex(r"f(x) = \sum_{k=0}^{n-1} c_k x^k")
+        z = MathTex(r"\cos {2 \pi \over n} + i \sin {2 \pi \over n}")
+        sum = MathTex(r"\sum_{k=0}^{n-1} (f^{-m})^k f(z^k)")
         self.play(*[FadeOut(mob) for mob in self.mobjects])
         self.wait()
         self.next_slide()
