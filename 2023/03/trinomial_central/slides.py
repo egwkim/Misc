@@ -1,3 +1,4 @@
+import math
 from typing import Any, Type
 
 from manim import *
@@ -845,17 +846,76 @@ class ComplexTrigonometry(Slide):
             faded_line_ratio=4,
         )
         coord_labels = plane.get_coordinate_labels()
-        
-        # TODO Add more description about complex number arithmetic and complex plane.
+        self.play(FadeIn(plane, coord_labels), run_time=0.6)
+        self.wait()
+        self.next_slide()
+
+        dot = Circle(0.07, BLUE, fill_opacity=1)
+
+        t = Circle(0, rgba_to_color((0, 0, 0, 0)))
+
+        label = VGroup(
+            DecimalNumber(), DecimalNumber(include_sign=True), MathTex("\, i")
+        )
+
+        def update_label(mobject):
+            mobject[0].set_value(plane.p2c(dot.get_center())[0])
+            mobject[1].set_value(plane.p2c(dot.get_center())[1])
+            mobject.arrange(buff=0.05)
+            mobject.next_to(dot, UR)
+
+        label.add_updater(update_label)
+
+        self.play(FadeIn(dot, scale=0), Write(label))
+        self.wait()
+        self.next_slide()
+
+        self.start_loop()
+        self.play(dot.animate.move_to(plane.n2p(1)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(-1)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(0)))
+        self.wait()
+        self.end_loop()
+
+        self.wait()
+        self.start_loop()
+        self.play(dot.animate.move_to(plane.n2p(1j)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(-1j)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(0)))
+        self.wait()
+        self.end_loop()
+
+        self.wait()
+        self.play(dot.animate.move_to(plane.n2p(1 + 0.5j)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(-2 + 1j)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(-1.5 + 0.2j)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(-0.5 - 0.7j)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(1 - 1j)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(0.7 + 0.3j)))
+        self.wait(0.5)
+        self.play(dot.animate.move_to(plane.n2p(0)))
+        self.wait()
+        self.next_slide()
+
+        # TODO Complex number arithmetic and vector sum
+
+        self.play(FadeOut(dot, label))
+        self.wait()
+        self.next_slide()
 
         unit_circle = Circle.from_three_points(
             *(plane.n2p(1), plane.n2p(-1), plane.n2p(1j)),
             color=GREEN,
         )
-
-        self.play(FadeIn(plane, coord_labels), run_time=0.6)
-        self.wait()
-        self.next_slide()
 
         self.play(Create(unit_circle))
         self.wait()
