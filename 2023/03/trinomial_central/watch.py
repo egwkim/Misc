@@ -73,9 +73,11 @@ def watch(file, command, interval: float = 1, on_exit: Callable | None = None):
         stamp = os.stat(file).st_mtime
 
 
+scenes = "Intro Polynomial ComplexTrigonometry ComplexPlaneSlide ValueToCoeff Integral Outro".split()
+
+
 def select_scenes():
     # TODO Parse scenes automatically
-    scenes = "Intro Polynomial ComplexTrigonometry ComplexPlaneSlide ValueToCoeff Integral Outro".split()
     for i, s in enumerate(scenes):
         print(f"{i+1}: {s}")
 
@@ -94,6 +96,8 @@ def select_scenes():
 
 def main():
     if len(sys.argv) > 1:
+        if sys.argv[1] == "-a":
+            selected_scenes = scenes
         selected_scenes = " ".join(sys.argv[1:])
     else:
         selected_scenes = select_scenes()
