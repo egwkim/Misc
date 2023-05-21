@@ -1,6 +1,7 @@
 import os
 import platform
 import subprocess
+import sys
 import threading
 import time
 from typing import Callable
@@ -72,18 +73,36 @@ def watch(file, command, interval: float = 1, on_exit: Callable | None = None):
         stamp = os.stat(file).st_mtime
 
 
+def select_scenes():
+    scenes = "Intro Polynomial ComplexTrigonometry ValueToCoeff Integral Outro".split()
+    for i, s in enumerate(scenes):
+        print(f"{i+1}: {s}")
+
+    while True:
+        try:
+            selections = [int(i) for i in input("Select scenes: ").split(",")]
+            for i in selections:
+                if not (0 < i and i < len(scenes) + 1):
+                    raise IndexError(f"Index out of range: {i}")
+            selected_scenes = " ".join(scenes[i - 1] for i in selections)
+            break
+        except (ValueError, IndexError) as e:
+            print(e)
+    return selected_scenes
+
+
 def main():
-    # TODO Add arg parser to set scenes
-    # or input keys to change scenes
-    
-    #scenes = "Intro Polynomial ComplexTrigonometry ValueToCoeff Integral Outro"
-    scenes = "Integral"
+    if len(sys.argv) > 1:
+        selected_scenes = " ".join(sys.argv[1:])
+    else:
+        selected_scenes = select_scenes()
+
     output = "slides.html"
     verbosity = "info"
     quality = "l"
     command = (
-        f"manim -q{quality} -v {verbosity} --progress_bar display slides.py {scenes} && "
-        f"manim-slides convert {scenes} {output}"
+        f"manim -q{quality} -v {verbosity} --progress_bar display slides.py {selected_scenes} && "
+        f"manim-slides convert {selected_scenes} {output}"
     )
 
     def success_message():
