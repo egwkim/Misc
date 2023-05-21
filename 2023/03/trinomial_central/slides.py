@@ -1239,11 +1239,7 @@ class ComplexPlaneSlide(Slide):
         self.next_slide()
 
 
-class ValueToCoeff(Slide):
-    """
-    다항함수 함숫값 -> 계수 구하기
-    """
-
+class ValueToCoeffCubic(Slide):
     def construct(self):
         polynomial = MathTex("f(x) = ax^3 + bx^2 + cx + d")
         polynomial.shift(UP * 3)
@@ -1291,8 +1287,6 @@ class ValueToCoeff(Slide):
 
         line = Line(LEFT * 4.5, RIGHT * 4.5, stroke_width=1.5)
         line.next_to(values, DOWN)
-        self.wait(0.1)
-        self.next_slide()
 
         sum = MathTex(
             r"\sum_{k=0}^3 f(z^k)",
@@ -1496,7 +1490,15 @@ class ValueToCoeff(Slide):
 
         self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.8)
         self.wait(0.1)
+        self.next_slide()
 
+
+class ValueToCoeff(Slide):
+    """
+    다항함수 함숫값 -> 계수 구하기
+    """
+
+    def construct(self):
         self.next_slide()
         polynomial = MathTex(r"f(x) = \sum_{k=0}^{n-1} c_k x^k")
         z = MathTex(r"\cos {2 \pi \over n} + i \sin {2 \pi \over n}")
@@ -1748,6 +1750,7 @@ class Integral(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # BUG Minus sign transform not intended
         self.play(
             TransformMatchingShapes(integral_results[4], integral_results[5]),
             run_time=0.5,
@@ -1822,10 +1825,13 @@ class Integral(Slide):
         VGroup(
             integral_1_2.target[0], I_3, I_5, I_7, integral_1_2.target[1], I_4, I_6, I_8
         ).arrange_in_grid(
-            rows=2, col_widths=[2.5] * 4, buff=(0.5, 0.75), cell_alignment=LEFT
+            rows=2, col_widths=[2.5] * 4, buff=(0.5, 0.8), cell_alignment=ORIGIN
         ).center().shift(
             DOWN * 0.5
         )
+        I_4.shift(LEFT*0.3)
+        I_6.shift(LEFT*0.2)
+        I_8.shift(RIGHT*0.3)
 
         self.play(MoveToTarget(integral_1_2))
         self.wait(0.1)
