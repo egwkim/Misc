@@ -74,7 +74,8 @@ def watch(file, command, interval: float = 1, on_exit: Callable | None = None):
 
 
 def select_scenes():
-    scenes = "Intro Polynomial ComplexTrigonometry ValueToCoeff Integral Outro".split()
+    # TODO Parse scenes automatically
+    scenes = "Intro Polynomial ComplexTrigonometry ComplexPlaneSlide ValueToCoeff Integral Outro".split()
     for i, s in enumerate(scenes):
         print(f"{i+1}: {s}")
 
