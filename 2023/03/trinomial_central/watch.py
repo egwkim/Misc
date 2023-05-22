@@ -102,12 +102,14 @@ def main():
     else:
         selected_scenes = select_scenes()
 
+    # TODO Set slides title
+    title = "Slides"
     output = "slides.html"
     verbosity = "info"
     quality = "l"
     command = (
         f"manim -q{quality} -v {verbosity} --progress_bar display slides.py {selected_scenes} && "
-        f"manim-slides convert {selected_scenes} {output}"
+        f"manim-slides convert -ctitle={title} {selected_scenes} {output}"
     )
 
     def success_message():
