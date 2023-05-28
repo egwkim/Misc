@@ -848,7 +848,14 @@ class ComplexPlaneSlide(Slide):
             faded_line_ratio=4,
         )
         coord_labels = plane.get_coordinate_labels()
+
         self.play(FadeIn(plane, coord_labels), run_time=0.6)
+        self.wait(0.1)
+        self.next_slide()
+
+        # Indicate y-axis labels (Imaginary labels)
+        factor = 1.5
+        self.play(Indicate(coord_labels[4], factor), Indicate(coord_labels[5], factor))
         self.wait(0.1)
         self.next_slide()
 
@@ -906,9 +913,103 @@ class ComplexPlaneSlide(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        # TODO Complex number arithmetic and vector sum
+        self.play(FadeOut(dot, label), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
 
-        self.play(FadeOut(dot, label))
+        dot2 = dot.copy()
+        label = MathTex("z_1")
+        label2 = MathTex("z_2")
+        dot.move_to(plane.n2p(0.5 + 1j))
+        label.next_to(dot, UR)
+        dot2.move_to(plane.n2p(1 - 0.5j))
+        label2.next_to(dot2, UR)
+
+        self.play(Create(dot), Write(label), Create(dot2), Write(label2), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        complex_sum_tex = MathTex(
+            r"z_1 &= a + bi \\ ",
+            r"z_2 &= c + di \\ ",
+            r"z_1 + z_2 &= (a + c) + (b + d)i",
+        )
+        complex_sum_tex.shift(LEFT * 3).scale(1.2)
+        complex_sum_rect = SurroundingRectangle(
+            complex_sum_tex, buff=0.4, corner_radius=0.2
+        )
+        complex_sum_rect.set_stroke(width=3)
+        complex_sum_rect.set_fill(color=BLACK, opacity=0.5)
+        complex_sum_tex.set_z_index(1)
+
+        self.play(
+            AnimationGroup(
+                Create(complex_sum_rect),
+                Write(complex_sum_tex),
+                lag_ratio=0.8,
+                run_time=1.2,
+            )
+        )
+        self.wait(0.1)
+        self.next_slide()
+
+        parts = VGroup(complex_sum_tex[0][3].copy(), complex_sum_tex[1][3].copy())
+        parts.generate_target()
+        parts.target = VGroup(complex_sum_tex[2][7], complex_sum_tex[2][9])
+
+        self.play(
+            AnimationGroup(
+                Indicate(complex_sum_tex[0][3]), Indicate(complex_sum_tex[1][3])
+            )
+        )
+        self.play(MoveToTarget(parts))
+        self.remove(parts)
+        self.wait(0.1)
+        self.next_slide()
+
+        parts = VGroup(complex_sum_tex[0][5].copy(), complex_sum_tex[1][5].copy())
+        parts.generate_target()
+        parts.target = VGroup(complex_sum_tex[2][13], complex_sum_tex[2][15])
+
+        self.play(
+            AnimationGroup(
+                Indicate(complex_sum_tex[0][5]), Indicate(complex_sum_tex[1][5])
+            )
+        )
+        self.play(MoveToTarget(parts))
+        self.remove(parts)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(complex_sum_tex, complex_sum_rect))
+        self.wait(0.1)
+        self.next_slide()
+
+        # Vector sum
+        vec = Vector([dot.get_x(), dot.get_y()])
+        vec2 = Vector([dot2.get_x(), dot2.get_y()])
+        self.play(Create(vec, lag_ratio=0.7), Create(vec2, lag_ratio=0.7))
+        self.wait(0.1)
+        self.next_slide()
+
+        vec2_copy = vec2.copy()
+        self.play(vec2_copy.animate.move_to(plane.n2p(1 + 0.75j)), run_time=0.5)
+
+        dot3 = dot.copy()
+        dot3.move_to(plane.n2p(1.5 + 0.5j))
+        vec3 = Vector(plane.n2p(1.5 + 0.5j))
+        label3 = MathTex("z_1 + z_2")
+        label3.next_to(dot3, UR)
+
+        self.play(Create(vec3, lag_ratio=0.5))
+        self.play(AnimationGroup(FadeIn(dot3), Write(label3)), lag_ratio=0.3)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(
+            FadeOut(dot, dot2, dot3, vec, vec2, vec2_copy, vec3, label, label2, label3),
+            run_time=0.5,
+        )
         self.wait(0.1)
         self.next_slide()
 
@@ -1493,6 +1594,7 @@ class ValueToCoeffCubic(Slide):
         self.next_slide()
 
 
+# TODO ValueToCoeff
 class ValueToCoeff(Slide):
     """
     다항함수 함숫값 -> 계수 구하기
@@ -1508,6 +1610,7 @@ class ValueToCoeff(Slide):
         self.next_slide()
 
 
+# TODO Integral
 class Integral(Slide):
     """
     적분식 표현, 삼각함수 거듭제곱 적분, 최종 계산 결과
@@ -1829,9 +1932,9 @@ class Integral(Slide):
         ).center().shift(
             DOWN * 0.5
         )
-        I_4.shift(LEFT*0.3)
-        I_6.shift(LEFT*0.2)
-        I_8.shift(RIGHT*0.3)
+        I_4.shift(LEFT * 0.3)
+        I_6.shift(LEFT * 0.2)
+        I_8.shift(RIGHT * 0.3)
 
         self.play(MoveToTarget(integral_1_2))
         self.wait(0.1)
@@ -1863,6 +1966,7 @@ class Integral(Slide):
         self.next_slide()
 
 
+# TODO Outro
 class Outro(Slide):
     def construct(self):
         self.play(*[FadeOut(mob) for mob in self.mobjects])
