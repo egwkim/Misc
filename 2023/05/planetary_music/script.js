@@ -73,8 +73,8 @@ class Planet {
 const sun = new Sun(40, "#ffc10788", 35000);
 const planets = [];
 
-planets.push(new Planet(width * 0.35, height * 0.56, 25, 55, 8, "#007bff"));
-planets.push(new Planet(width * 0.55, height * 0.23, -75, 15, 7, "#7bff00"));
+planets.push(new Planet(width / 2 - 10, height / 2 + 155, 80, 25, 8, "#007bff"));
+planets.push(new Planet(width / 2 + 10, height / 2 - 230, -75, 15, 7, "#7bff00"));
 
 let muted = true;
 document.addEventListener("click", () => {
