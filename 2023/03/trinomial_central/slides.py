@@ -81,8 +81,8 @@ class Intro(Slide):
                 ),
                 Rectangle(**overview_rectangle_style).add(
                     MathTex(
-                        r"c_8 =& {1 \over n}{\sum^{n-1}_{k=0} f(e^{2 k \pi i k \over n})e^{- {16 k \pi i k \over n}}} \\"
-                        r"=& {1 \over n}{\sum^{n-1}_{k=0} (1 + 2\cos{2 k \pi \over n})^8}",
+                        r"c_8 =& {1 \over n} \sum^{n-1}_{k=0} f(z^k) z^{-8k} \\"
+                        r"=& {1 \over n} \sum^{n-1}_{k=0} (1 + 2\cos{2 k \pi \over n})^8",
                     ).scale(0.6)
                 ),
                 Rectangle(**overview_rectangle_style).add(
@@ -1275,7 +1275,7 @@ class ComplexPlaneSlide(Slide):
         self.next_slide()
 
         roots_sum_result = MathTex(
-            r"S_k = {\begin{cases} n & (k = 0, n, 2n, 3n, \cdots) \\ 0 & (otherwise) \end{cases}}",
+            r"S_k = {\begin{cases} n & (k = \cdots, -2n, -n, 0, n, 2n, \cdots) \\ 0 & (otherwise) \end{cases}}",
         )
         (
             roots_sum_result.scale(0.7)
@@ -1601,10 +1601,67 @@ class ValueToCoeff(Slide):
     """
 
     def construct(self):
-        self.next_slide()
         polynomial = MathTex(r"f(x) = \sum_{k=0}^{n-1} c_k x^k")
-        z = MathTex(r"\cos {2 \pi \over n} + i \sin {2 \pi \over n}")
-        sum = MathTex(r"\sum_{k=0}^{n-1} (f^{-m})^k f(z^k)")
+        z = MathTex(r"z = \cos {2 \pi \over n} + i \sin {2 \pi \over n}")
+        sum = MathTex(r"c_m = {1 \over n} \sum_{k=0}^{n-1} (z^k)^{-m} f(z^k)")
+        Group(polynomial, z, sum).arrange(DOWN, buff=1)
+
+        self.play(Write(polynomial), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+        self.play(Write(z), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+        self.play(Write(sum), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+        z.save_state()
+        self.play(
+            AnimationGroup(
+                FadeOut(polynomial, sum),
+                z.animate.shift(UP * 2 + LEFT * 2.5),
+                lag_ratio=0.5,
+            )
+        )
+        self.wait(0.1)
+        self.next_slide()
+
+        z_equation = VGroup(
+            MathTex("x^n - 1", "= 0"),
+            MathTex("(x-z^0)(x-z^1)(x-z^2) \cdots (x-z^{n-1})", "= 0"),
+        )
+        z_equation.scale(0.9).arrange(DOWN, aligned_edge=LEFT, buff=0.35)
+        z_equation.next_to(z, DOWN, 0.6, LEFT)
+
+        self.play(Write(z_equation[0]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+        self.play(TransformFromCopy(z_equation[0], z_equation[1]))
+        self.wait(0.1)
+        self.next_slide()
+
+        z_sum = MathTex(
+            r"{1 \over n} \sum ^{n-1} _{m=0} (z^m)^k",
+            "=",
+            r"\begin{cases} 1 & (k = \cdots, -2n, -n, 0, n, 2n, \cdots) \\ 0 & (otherwise) \end{cases}",
+        )
+        z_sum.scale(0.9).next_to(z_equation, DOWN, 0.7, LEFT)
+
+        self.play(Write(z_sum), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(
+            AnimationGroup(
+                FadeOut(z_equation, z_sum),
+                z.animate.restore(),
+                FadeIn(polynomial, sum),
+                lag_ratio=0.5,
+            )
+        )
+        self.wait(0.1)
+        self.next_slide()
+
         self.play(*[FadeOut(mob) for mob in self.mobjects])
         self.wait(0.1)
         self.next_slide()
