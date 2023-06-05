@@ -721,7 +721,25 @@ class ComplexTrigonometry(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        # TODO Add complex number sum
+        complex_sum = MathTex(
+            "( a + b i )",
+            "+" "( c + d i )",
+            substrings_to_isolate=" ",
+        ).scale(1.4)
+        self.play(TransformMatchingTex(complex_number, complex_sum))
+        self.wait(0.1)
+        self.next_slide()
+        complex_sum_result = MathTex(
+            "= ( a + c ) + ( b + d ) i",
+            substrings_to_isolate=" ",
+        )
+        complex_sum_result.scale(1.4).shift(UP * 0.5)
+        self.play(
+            complex_sum.animate.shift(UP * 1.5),
+            TransformMatchingShapes(complex_sum.copy(), complex_sum_result),
+        )
+        self.wait(0.1)
+        self.next_slide()
 
         complex_mult = MathTex(
             "( a + b i )",
@@ -729,23 +747,20 @@ class ComplexTrigonometry(Slide):
             substrings_to_isolate=" ",
         ).scale(1.4)
 
-        # BUG Incorrect plus sign transform.
+        complex_mult.match_y(complex_sum)
         self.play(
-            TransformMatchingShapes(complex_number, complex_mult[:11]),
-            FadeIn(complex_mult[11:]),
+            TransformMatchingShapes(complex_sum, complex_mult),
+            FadeOut(complex_sum_result),
         )
         self.wait(0.1)
         self.next_slide()
-
         complex_mult_result = MathTex(
             "= ( a c - b d ) + ",
             "( a d + b c ) i",
             substrings_to_isolate=" ",
         )
         complex_mult_result.scale(1.4).shift(UP * 0.5)
-
         self.play(
-            complex_mult.animate.shift(UP * 1.5),
             TransformMatchingTex(complex_mult.copy(), complex_mult_result),
         )
         self.wait(0.1)
