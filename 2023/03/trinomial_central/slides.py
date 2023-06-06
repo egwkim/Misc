@@ -125,7 +125,7 @@ class Intro(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
 
@@ -168,7 +168,7 @@ class Intro(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
 
@@ -259,7 +259,7 @@ class Intro(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.play(FadeOut(*self.mobjects))
         self.wait(0.1)
         self.next_slide()
 
@@ -582,7 +582,7 @@ class Polynomial(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
 
@@ -662,7 +662,7 @@ class ComplexTrigonometry(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
 
         polynomial = MathTex("f(x) = ax^3 + bx^2 + cx + d")
         self.play(FadeIn(polynomial), run_time=0.5)
@@ -707,7 +707,7 @@ class ComplexTrigonometry(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.6)
+        self.play(FadeOut(*self.mobjects), run_time=0.6)
         self.wait(0.1)
         self.next_slide()
 
@@ -852,7 +852,7 @@ class ComplexTrigonometry(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
 
@@ -1303,6 +1303,7 @@ class ComplexPlaneSlide(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Iterate n = 1 to n = 6
         n_tex = MathTex("n = 1")
         n_tex.scale(0.7).next_to(plane, DOWN, 0.8)
         n_tex.generate_target()
@@ -1329,13 +1330,14 @@ class ComplexPlaneSlide(Slide):
                 anim.append(Write(n_tex))
             else:
                 anim.append(FadeIn(*root_segments, *root_points))
-            self.play(*anim, run_time=0.5)
+            self.play(*anim, run_time=0.8)
             self.wait(0.1)
             self.next_slide()
 
         self.play(FadeOut(n_tex), run_time=0.7)
         self.wait(0.3)
 
+        # Show roots sum equation
         roots_sum = MathTex(
             r"S_k = ",
             r"\sum^{n-1}_{m=0}",
@@ -1358,6 +1360,7 @@ class ComplexPlaneSlide(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Iterate k = 1 to k = 6 and show average point
         k_tex = MathTex("k = 1")
         avg_point = Circle(0.08, BLUE, fill_opacity=1).move_to(plane.n2p(0))
         k_tex.scale(0.7).next_to(plane, DOWN, 0.8)
@@ -1365,7 +1368,13 @@ class ComplexPlaneSlide(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(FadeIn(avg_point, scale=0.5), run_time=0.4)
+        self.play(
+            AnimationGroup(
+                FadeIn(avg_point, scale=0.5),
+                Flash(avg_point, color=BLUE),
+                run_time=0.7,
+            )
+        )
         self.wait(0.1)
         self.next_slide()
         self.play(FadeOut(avg_point, scale=0.5), run_time=0.4)
@@ -1405,6 +1414,7 @@ class ComplexPlaneSlide(Slide):
             self.wait(0.1)
             self.next_slide()
 
+        # Remove complex plane and show geometric series equations
         to_remove = Group(
             k_tex, coord_labels, plane, unit_circle, *root_points, *root_segments
         )
@@ -1444,7 +1454,7 @@ class ComplexPlaneSlide(Slide):
             self.wait(0.1)
             self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
 
@@ -1698,7 +1708,7 @@ class ValueToCoeffCubic(Slide):
             self.wait(0.1)
             self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.8)
+        self.play(FadeOut(*self.mobjects), run_time=0.8)
         self.wait(0.1)
         self.next_slide()
 
@@ -1773,7 +1783,7 @@ class ValueToCoeff(Slide):
         # TODO Expand polynomial
         # TODO Calculate c_8
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.play(FadeOut(*self.mobjects))
         self.wait(0.1)
         self.next_slide()
 
@@ -2135,7 +2145,7 @@ class Integral(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.play(FadeOut(*self.mobjects))
         self.wait(0.1)
         self.next_slide()
 
@@ -2145,6 +2155,6 @@ class Integral(Slide):
 # TODO Outro
 class Outro(Slide):
     def construct(self):
-        self.play(*[FadeOut(mob) for mob in self.mobjects])
+        self.play(FadeOut(*self.mobjects))
         self.wait(0.1)
         self.next_slide()
