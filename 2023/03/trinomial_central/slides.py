@@ -1303,25 +1303,38 @@ class ComplexPlaneSlide(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        # TODO Show n=1 to n=5
+        n_tex = MathTex("n = 1")
+        n_tex.scale(0.7).next_to(plane, DOWN, 0.8)
+        n_tex.generate_target()
 
-        n = 6
-        root_points = [
-            Circle(0.07, YELLOW, fill_opacity=1).move_to(
-                unit_circle.point_at_angle(2 * PI * i / n)
-            )
-            for i in range(n)
-        ]
-        root_segments = [
-            Line(plane.n2p(0), unit_circle.point_at_angle(2 * PI * i / n))
-            for i in range(n)
-        ]
-        self.play(
-            *[FadeIn(i) for i in concatenate_lists(root_segments, root_points)],
-            run_time=0.5,
-        )
-        self.wait(0.1)
-        self.next_slide()
+        for n in range(1, 7):
+            anim = []
+            if n > 1:
+                n_tex.target = MathTex(f"n = {n}")
+                n_tex.target.scale(0.7).move_to(n_tex)
+                anim.append(MoveToTarget(n_tex))
+                anim.append(FadeOut(*root_segments, *root_points))
+            root_points = [
+                Circle(0.07, YELLOW, fill_opacity=1).move_to(
+                    unit_circle.point_at_angle(2 * PI * i / n)
+                )
+                for i in range(n)
+            ]
+            root_segments = [
+                Line(plane.n2p(0), unit_circle.point_at_angle(2 * PI * i / n))
+                for i in range(n)
+            ]
+            if n == 1:
+                anim.append(FadeIn(*root_segments, *root_points))
+                anim.append(Write(n_tex))
+            else:
+                anim.append(FadeIn(*root_segments, *root_points))
+            self.play(*anim, run_time=0.5)
+            self.wait(0.1)
+            self.next_slide()
+
+        self.play(FadeOut(n_tex), run_time=0.7)
+        self.wait(0.3)
 
         roots_sum = MathTex(
             r"S_k = ",
@@ -1379,23 +1392,59 @@ class ComplexPlaneSlide(Slide):
 
             if i == 6:
                 avg_point.move_to(plane.n2p(1))
-            self.play(FadeIn(avg_point, scale=0.5), run_time=0.4)
+            self.play(
+                AnimationGroup(
+                    FadeIn(avg_point, scale=0.5),
+                    Flash(avg_point, color=BLUE),
+                    run_time=0.7,
+                )
+            )
             self.wait(0.1)
             self.next_slide()
             self.play(FadeOut(avg_point, scale=0.5), run_time=0.4)
             self.wait(0.1)
             self.next_slide()
 
-        self.play(
-            Unwrite(equation),
-            Unwrite(z),
-            Unwrite(roots_sum),
-            Unwrite(roots_sum_result),
-            Unwrite(k_tex),
-            Unwrite(coord_labels),
-            FadeOut(plane, unit_circle, *root_points, *root_segments),
-            run_time=0.5,
+        to_remove = Group(
+            k_tex, coord_labels, plane, unit_circle, *root_points, *root_segments
         )
+        self.play(FadeOut(to_remove, scale=0.5), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        series = MathTex(
+            r"S_k ",
+            r"&= \sum^{n-1}_{m=0} (z^m)^k \\ ",
+            r"&= \sum^{n-1}_{m=0} (z^k)^m \\ ",
+            r"&= (z^k)^0 + (z^k)^1 + \cdots + (z^k)^{n-1} \\ ",
+            r"&= { 1 - (z^k)^n \over 1 - z^k}",
+            r"\quad (z^k \ne  1) \\ ",
+            r"&= 0",
+        )
+        series.scale(0.7).next_to(equation, LEFT, aligned_edge=UP)
+
+        anim = [
+            AnimationGroup(Write(series[0]), Write(series[1]), run_time=0.6),
+            AnimationGroup(
+                Transform(series[1][:10].copy(), series[2][:10]),
+                Transform(series[1][10].copy(), series[2][12]),
+                Transform(series[1][11].copy(), series[2][11]),
+                Transform(series[1][12].copy(), series[2][10]),
+                run_time=0.7,
+            ),
+            Write(series[3], run_time=0.3),
+            Write(series[4], run_time=0.3),
+            FadeIn(series[5], shift=LEFT * 0.2, scale=1.4),
+            Indicate(series[4][3:8]),
+            Write(series[6], run_time=0.3),
+        ]
+
+        for a in anim:
+            self.play(a)
+            self.wait(0.1)
+            self.next_slide()
+
+        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=0.5)
         self.wait(0.1)
         self.next_slide()
 
