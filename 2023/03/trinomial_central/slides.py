@@ -2228,6 +2228,143 @@ class ApplyValueToCoeff(Slide):
         self.next_slide()
 
 
+class ToIntegral1(Slide):
+    def construct(self):
+        eq = MathTex(
+            r"f(x) &= ",
+            r"\sum ^{n-1} _{k=0} c_k x^k",
+            r"\\ c_m &=",
+            r"{1 \over n}",
+            r"\sum_{k=0}^{n-1} (z^k)^{-m} f(z^k)",
+        )
+
+        self.play(FadeIn(eq), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        plus = MathTex(r"+ \; 0 x^n")
+        plus.next_to(eq[1])
+        self.play(FadeIn(plus), run_time=0.3)
+        self.wait(0.1)
+        self.next_slide()
+
+        n = MathTex(r"\sum_{k=0}^n")
+        n[0][0].move_to(eq[1][0:3])
+        c_n = MathTex(r"(c_n = 0)")
+        c_n.move_to(plus).shift(RIGHT * 0.7)
+        self.play(
+            AnimationGroup(
+                FadeOut(plus),
+                Transform(eq[1][0:3], n[0][0]),
+                FadeIn(c_n),
+                lag_ratio=0.4,
+            )
+        )
+        self.wait(0.1)
+        self.next_slide()
+
+        n_plus_1 = MathTex(
+            r"{1 \over n + 1}",
+            r"\sum_{k=0}^{n} (z^k)^{-m} f(z^k)",
+        )
+        n_plus_1.move_to(eq[3], LEFT)
+        self.play(
+            Transform(eq[3], n_plus_1[0]),
+            Transform(eq[4][0:3], n_plus_1[1][0]),
+            Transform(eq[4][3:], n_plus_1[1][1:]),
+        )
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+
+class ToIntegral2(Slide):
+    def construct(self):
+        c_8 = Group(
+            MathTex(
+                r"c_8 =& ",
+                r"\lim\limits_{n \to \infty}",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"(1 + 2 \cos{2 k \pi \over n})",
+                r"^8",
+            ),
+            MathTex(
+                r"c_8 =& ",
+                r"\int ^1 _0",
+                r"(1 + 2 \cos{2 \pi x})",
+                r"^8",
+                r"\> dx",
+            ),
+            MathTex(
+                r"c_8 =& ",
+                r"\int ^1 _0",
+                r"\sum ^8 _{k=0}",
+                r"{_n C _k}",
+                r"(2 \cos{2 \pi x})^k",
+                r"\> dx",
+            ),
+            MathTex(
+                r"c_8 =& ",
+                r"\int ^1 _0",
+                r"\sum ^8 _{k=0}",
+                r"{_n C _k}",
+                r"2^k",
+                r"\cos^k{2 \pi x}",
+                r"\> dx",
+            ),
+            MathTex(
+                r"c_8 =& ",
+                r"\sum ^8 _{k=0}",
+                r"{_n C _k}",
+                r"2^k",
+                r"\int ^1 _0",
+                r"\cos^k{2 \pi x}",
+                r"\> dx",
+            ),
+        )
+        for i in c_8[3:]:
+            i.move_to(c_8[2], LEFT)
+
+        self.play(FadeIn(c_8[0]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Indicate(c_8[0][2:4]))
+        self.wait(0.1)
+        self.next_slide()
+        self.play(Indicate(c_8[0][4][8]), Indicate(c_8[0][4][11]))
+        self.wait(0.1)
+        self.next_slide()
+
+        for i in [0, 1]:
+            self.play(TransformMatchingShapes(c_8[i], c_8[i + 1]))
+            self.wait(0.1)
+            self.next_slide()
+
+        self.play(TransformMatchingShapes(c_8[2][4:], c_8[3][4:]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.remove(*self.mobjects)
+        self.add(c_8[3])
+
+        self.play(TransformMatchingTex(c_8[3], c_8[4]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Indicate(c_8[4][4:]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+
 class Integral(Slide):
     """
     적분식 표현, 삼각함수 거듭제곱 적분, 최종 계산 결과
