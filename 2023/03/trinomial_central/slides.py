@@ -2035,9 +2035,197 @@ class ValueToCoeff(Slide):
 
 
 class ApplyValueToCoeff(Slide):
-    def construct():
-        # TODO Calculate c_8
-        pass
+    def construct(self):
+        polynomial = MathTex(
+            r"f(x) =&",
+            r"(1+x+x^2)^8 \\",
+            r"=&",
+            r"\sum ^{n-1} _{k=0} c_k x^k",
+            r"\quad (n = 17)",
+        )
+        polynomial.shift(UP * 1.3)
+
+        c_8 = MathTex(
+            r"c_8 =&",
+            r"{1 \over n} \sum^{n-1}_{k=0} (z^k)^{-8}",
+            r"f(z^k)",
+        )
+        c_8.next_to(polynomial, DOWN, 0.8)
+
+        z = MathTex(r"z = \cos {2 \pi \over n} + i \sin {2 \pi \over n}")
+        z.scale(0.6).shift(RIGHT * 4.7, DOWN * 3)
+        z_box = SurroundingRectangle(
+            z, stroke_width=1, fill_color=WHITE, fill_opacity=0.1, corner_radius=0.2
+        )
+
+        self.play(FadeIn(polynomial[:2], scale=0.8))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Write(polynomial[2:]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Write(c_8), run_time=0.7)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeIn(z, z_box, scale=0.8))
+        self.wait(0.1)
+        self.next_slide()
+
+        c_8_calc = VGroup(
+            MathTex(
+                r"=& ",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"(z^k)^{-8}",
+                r"(1 + z^k + z^{2k})^8",
+            ),
+            MathTex(
+                r"=& ",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"(z^{-k})^8",
+                r"(1 + z^k + z^{2k})^8",
+            ),
+            MathTex(
+                r"=& ",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"\{",
+                r"(z^{-k})",
+                r"(1 + z^k + z^{2k})",
+                r"\}",
+                r"^8",
+            ),
+            MathTex(
+                r"=& ",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"(",
+                r"z^{-k} + 1 + z^k",
+                r")",
+                r"^8",
+            ),
+            MathTex(
+                r"=& ",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"(",
+                r"\overline{z^k} + 1 + z^k",
+                r")",
+                r"^8",
+            ),
+            MathTex(
+                r"=& ",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"(",
+                r"1 + \overline{z^k} + z^k",
+                r")",
+                r"^8",
+            ),
+            MathTex(
+                r"=& ",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"(1 + 2 \cos{2 k \pi \over n})",
+                r"^8",
+            ),
+            MathTex(
+                r"=& ",
+                r"\lim\limits_{n \to \infty}",
+                r"{1 \over n}",
+                r"\sum^{n-1}_{k=0}",
+                r"(1 + 2 \cos{2 k \pi \over n})",
+                r"^8",
+            ),
+        )
+        for i in c_8_calc:
+            i.move_to(c_8_calc[0], aligned_edge=UL)
+
+        c_8.generate_target()
+        c_8.target = MathTex(
+            r"c_8 =&",
+            r"{1 \over n} \sum^{n-1}_{k=0} (z^k)^{-8}",
+            r"(1 + z^k + z^{2k})^8",
+        ).move_to(c_8, LEFT)
+        self.play(Indicate(polynomial[:2]), Indicate(c_8[2]))
+        self.play(TransformMatchingTex(c_8, c_8.target, True))
+        c_8 = c_8.target
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(
+            AnimationGroup(
+                FadeOut(polynomial),
+                c_8.animate.shift(UP * 3.2, LEFT * 3),
+                run_time=0.8,
+                lag_ratio=0.3,
+            )
+        )
+        self.wait(0.1)
+        self.next_slide()
+        c_8_calc.next_to(c_8, DOWN)
+        x_diff = (c_8[0].get_right() - c_8_calc[0][0].get_right())[0]
+        c_8_calc.shift(x_diff * RIGHT)
+
+        c_8_calc[0].save_state()
+        c_8_calc[0].move_to(c_8, RIGHT)
+        self.play(Restore(c_8_calc[0]))
+        self.wait(0.1)
+        self.next_slide()
+
+        z_bar = MathTex(
+            r"z^k \overline{z^k}",
+            r"&= \cos ^2 {2 k \pi \over n} + \sin ^2 {2 k \pi \over n} \\ &= 1 \\",
+            r"z^{-k} &= \overline{z^k}",
+        )
+        z_bar.scale(0.7).shift(RIGHT * 4.5)
+        z_bar_box = SurroundingRectangle(
+            z_bar,
+            BLUE,
+            0.3,
+            stroke_width=1.5,
+            fill_color=WHITE,
+            fill_opacity=0.1,
+            corner_radius=0.25,
+        )
+
+        for i in range(5):
+            self.play(TransformMatchingShapes(c_8_calc[i], c_8_calc[i + 1]))
+            self.wait(0.1)
+            self.next_slide()
+
+            if i == 2:
+                self.play(FadeIn(z_bar[0], z_bar_box, scale=0.8, run_time=0.5))
+                self.wait()
+                self.next_slide()
+                self.play(Write(z_bar[1]), run_time=0.5)
+                self.wait()
+                self.next_slide()
+                self.play(Write(z_bar[2]), run_time=0.5)
+                self.wait()
+                self.next_slide()
+                self.play(FadeOut(z_bar, z_bar_box, scale=0.8, run_time=0.5))
+
+        self.play(Indicate(c_8_calc[5][4][2:]))
+        self.wait(0.1)
+        self.next_slide()
+
+        for i in [6, 7]:
+            c_8_calc[i].next_to(c_8_calc[5], DOWN, aligned_edge=LEFT)
+        self.play(Write(c_8_calc[6]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+        self.play(TransformMatchingTex(c_8_calc[6], c_8_calc[7]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
 
 
 class Integral(Slide):
