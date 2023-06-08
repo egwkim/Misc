@@ -1,5 +1,7 @@
 from typing import Any, Type
 
+# TODO Highlight equations
+
 from manim import *
 from manim_slides import Slide
 
@@ -1260,7 +1262,7 @@ class ComplexPlaneSlide(Slide):
             r"&= \cos {2 \pi m} + i \sin {2 \pi m} \\ ",
             r"&= 1",
         )
-        roots_tex_2.scale(0.7).next_to(equation, DOWN, 0.8).align_to(equation, LEFT)
+        roots_tex_2.scale(0.7).next_to(equation, DOWN, 0.8, aligned_edge=LEFT)
 
         self.play(TransformMatchingTex(roots_tex, roots_tex_2))
         self.wait(0.1)
@@ -1719,25 +1721,25 @@ class ValueToCoeff(Slide):
     """
 
     def construct(self):
-        polynomial = MathTex(r"f(x) = \sum_{k=0}^{n-1} c_k x^k")
-        z = MathTex(r"z = \cos {2 \pi \over n} + i \sin {2 \pi \over n}")
+        polynomial = MathTex(r"f(x) = \sum_{k=0}^{n-1} c_k x", r"^k")
         sum = MathTex(r"c_m = {1 \over n} \sum_{k=0}^{n-1} (z^k)^{-m} f(z^k)")
-        Group(polynomial, z, sum).arrange(DOWN, buff=1)
+        z = MathTex(r"z = \cos {2 \pi \over n} + i \sin {2 \pi \over n}")
+        Group(polynomial, sum, z).arrange(DOWN, buff=1)
 
         self.play(Write(polynomial), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
-        self.play(Write(z), run_time=0.5)
+        self.play(Write(sum), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
-        self.play(Write(sum), run_time=0.5)
+        self.play(Write(z), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
         z.save_state()
         self.play(
             AnimationGroup(
                 FadeOut(polynomial, sum),
-                z.animate.shift(UP * 2 + LEFT * 2.5),
+                z.animate.move_to(UP * 2 + LEFT * 2.5),
                 lag_ratio=0.5,
             )
         )
@@ -1745,8 +1747,8 @@ class ValueToCoeff(Slide):
         self.next_slide()
 
         z_equation = VGroup(
-            MathTex("x^n - 1", "= 0"),
-            MathTex("(x-z^0)(x-z^1)(x-z^2) \cdots (x-z^{n-1})", "= 0"),
+            MathTex(r"x^n - 1", r"= 0"),
+            MathTex(r"(x-z^0)(x-z^1)(x-z^2) \cdots (x-z^{n-1})", r"= 0"),
         )
         z_equation.scale(0.9).arrange(DOWN, aligned_edge=LEFT, buff=0.35)
         z_equation.next_to(z, DOWN, 0.6, LEFT)
@@ -1780,12 +1782,262 @@ class ValueToCoeff(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        # TODO Expand polynomial
-        # TODO Calculate c_8
-
-        self.play(FadeOut(*self.mobjects))
+        self.play(VGroup(polynomial, sum, z).animate.shift(LEFT * 3.2), run_time=0.9)
         self.wait(0.1)
         self.next_slide()
+
+        # m = 0
+        sum_0 = VGroup(
+            MathTex(
+                r"c_0 = ",
+                r"{1 \over n} \sum_{k=0}^{n-1}",
+                r"(z^k)^{-0}",
+                r"f(z^k)",
+            ),
+            MathTex(
+                r"= ",
+                r"{1 \over n}",
+                r"\sum_{k=0}^{n-1}",
+                r"\sum_{j=0}^{n-1}",
+                r"c_j",
+                r"(z^k)^j",
+            ),
+            MathTex(
+                r"= ",
+                r"{1 \over n}",
+                r"\sum_{k=0}^{n-1}",
+                r"\sum_{j=0}^{n-1}",
+                r"c_j",
+                r"(z^k)^j",
+            ),
+        )
+        sum_0.scale(0.9).arrange(DOWN)
+        sum_0.shift(RIGHT * 3)
+        target_x = sum_0[0][0].get_right()
+        for i in sum_0:
+            x_diff = target_x - i[0].get_right()
+            i.shift(x_diff * RIGHT)
+
+        self.play(Write(sum_0[0]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        sum_0[0].generate_target()
+        sum_0[0].target = MathTex(
+            r"c_0 = ",
+            r"{1 \over n} \sum_{k=0}^{n-1}",
+            r"f(z^k)",
+        )
+        sum_0[0].target.scale(0.9).align_to(sum_0[0], UL)
+
+        self.play(
+            TransformMatchingTex(sum_0[0], sum_0[0].target, shift=LEFT * 0.3, scale=0.4)
+        )
+        sum_0[0] = sum_0[0].target
+        self.wait(0.1)
+        self.next_slide()
+
+        underline = Underline(sum_0[0][2], color=YELLOW, stroke_width=3)
+        self.play(Create(underline), run_time=0.5)
+        self.play(Indicate(polynomial))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Uncreate(underline), run_time=0.5)
+        self.play(Write(sum_0[1]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        sum_0[2].save_state()
+        sum_0[2].move_to(sum_0[1])
+        self.play(Restore(sum_0[2]))
+        self.wait(0.1)
+        self.next_slide()
+
+        sum_0[2].generate_target()
+        sum_0[2].target = MathTex(
+            r"= ",
+            r"{1 \over n}",
+            r"\sum_{j=0}^{n-1}",
+            r"\sum_{k=0}^{n-1}",
+            r"c_j",
+            r"(z^k)^j",
+        )
+        sum_0[2].target.scale(0.9).move_to(sum_0[2], aligned_edge=LEFT)
+        self.play(TransformMatchingTex(sum_0[2], sum_0[2].target))
+        sum_0[2] = sum_0[2].target
+        self.wait(0.1)
+        self.next_slide()
+
+        sum_0[2].target = MathTex(
+            r"= ",
+            r"{1 \over n}",
+            r"\sum_{j=0}^{n-1}",
+            r"c_j",
+            r"\sum_{k=0}^{n-1}",
+            r"(z^k)^j",
+        )
+        sum_0[2].target.scale(0.9).move_to(sum_0[2], aligned_edge=LEFT)
+        self.play(TransformMatchingTex(sum_0[2], sum_0[2].target))
+        sum_0[2] = sum_0[2].target
+        self.wait(0.1)
+        self.next_slide()
+
+        sum_0[2].target = MathTex(
+            r"= ",
+            r"\sum_{j=0}^{n-1}",
+            r"c_j",
+            r"{1 \over n}",
+            r"\sum_{k=0}^{n-1}",
+            r"(z^k)^j",
+        )
+        sum_0[2].target.scale(0.9).move_to(sum_0[2], aligned_edge=LEFT)
+        self.play(TransformMatchingTex(sum_0[2], sum_0[2].target))
+        sum_0[2] = sum_0[2].target
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Indicate(sum_0[2][3:]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(sum_0), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        # m = 1
+        sum_1 = VGroup(
+            MathTex(
+                r"c_1 = ",
+                r"{1 \over n} \sum_{k=0}^{n-1}",
+                r"(z^k)^{-1}",
+                r"f(z^k)",
+            ),
+            MathTex(
+                r"= ",
+                r"{1 \over n}",
+                r"\sum_{k=0}^{n-1}",
+                r"\sum_{j=0}^{n-1}",
+                r"c_j",
+                r"(z^k)^{j-1}",
+            ),
+            MathTex(
+                r"= ",
+                r"\sum_{j=0}^{n-1}",
+                r"c_j",
+                r"{1 \over n}",
+                r"\sum_{k=0}^{n-1}",
+                r"(z^k)^{j-1}",
+            ),
+        )
+        sum_1.scale(0.9).arrange(DOWN)
+        sum_1.shift(RIGHT * 3)
+        target_x = sum_1[0][0].get_right()
+        for i in sum_1:
+            x_diff = target_x - i[0].get_right()
+            i.shift(x_diff * RIGHT)
+
+        self.play(Write(sum_1[0]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        polynomial.generate_target()
+        polynomial.target = MathTex(
+            r"x", r"^{-1}", r"f(x) = \sum_{k=0}^{n-1} c_k x", r"^{k-1}"
+        )
+        polynomial_x = polynomial[0].get_left()
+        polynomial.target.shift(polynomial_x - polynomial.target[2].get_left())
+        self.play(TransformMatchingTex(polynomial, polynomial.target, shift=ORIGIN))
+        polynomial = polynomial.target
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Write(sum_1[1]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Write(sum_1[2]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Indicate(sum_1[2][3:]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Circumscribe(sum_1[2][5][4:]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(sum_1), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        # m = m
+        sum_m = VGroup(
+            MathTex(
+                r"c_m = ",
+                r"{1 \over n} \sum_{k=0}^{n-1}",
+                r"(z^k)^{-m}",
+                r"f(z^k)",
+            ),
+            MathTex(
+                r"= ",
+                r"{1 \over n}",
+                r"\sum_{k=0}^{n-1}",
+                r"\sum_{j=0}^{n-1}",
+                r"c_j",
+                r"(z^k)^{j-m}",
+            ),
+            MathTex(
+                r"= ",
+                r"\sum_{j=0}^{n-1}",
+                r"c_j",
+                r"{1 \over n}",
+                r"\sum_{k=0}^{n-1}",
+                r"(z^k)^{j-m}",
+            ),
+        )
+        sum_m.scale(0.9).arrange(DOWN)
+        sum_m.shift(RIGHT * 3)
+        target_x = sum_m[0][0].get_right()
+        for i in sum_m:
+            x_diff = target_x - i[0].get_right()
+            i.shift(x_diff * RIGHT)
+
+        self.play(Write(sum_m[0]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        polynomial.target = MathTex(
+            r"x", r"^{-m}", r"f(x) = \sum_{k=0}^{n-1} c_k x", r"^{k-m}"
+        )
+        polynomial.target.shift(polynomial_x - polynomial.target[2].get_left())
+        self.play(TransformMatchingTex(polynomial, polynomial.target))
+        polynomial = polynomial.target
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Write(sum_m[1]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Write(sum_m[2]), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Indicate(sum_m[2][3:]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+
+class ApplyValueToCoeff(Slide):
+    def construct():
+        # TODO Calculate c_8
+        pass
 
 
 class Integral(Slide):
@@ -1794,8 +2046,6 @@ class Integral(Slide):
     """
 
     def construct(self):
-        # TODO Highlight equations
-
         integral = MathTex(r"\int^1_0 \cos^n{2 \pi x} \> dx").scale(1.2)
         integral_calc = MathTex(
             r"I_n &= ",
@@ -1979,9 +2229,7 @@ class Integral(Slide):
             ),
         ]
         for i in integral_results:
-            i.scale(0.8).next_to(integral_calc[3], DOWN).align_to(
-                integral_calc[3], LEFT
-            )
+            i.scale(0.8).next_to(integral_calc[3], DOWN, aligned_edge=LEFT)
 
         self.play(ReplacementTransform(integral_calc[4][6:], zero))
         self.wait(0.2)
