@@ -111,21 +111,10 @@ class Intro(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(FadeIn(overview_imgs[0], scale=0.9), run_time=0.7)
-        self.wait(0.1)
-        self.next_slide()
-
-        self.play(FadeIn(overview_imgs[1], scale=0.9), run_time=0.7)
-        self.wait(0.1)
-        self.next_slide()
-
-        self.play(FadeIn(overview_imgs[2], scale=0.9), run_time=0.7)
-        self.wait(0.1)
-        self.next_slide()
-
-        self.play(FadeIn(overview_imgs[3], scale=0.9), run_time=0.7)
-        self.wait(0.1)
-        self.next_slide()
+        for img in overview_imgs:
+            self.play(FadeIn(img, scale=0.9), run_time=0.7)
+            self.wait(0.1)
+            self.next_slide()
 
         self.play(FadeOut(*self.mobjects), run_time=0.5)
         self.wait(0.1)
@@ -197,12 +186,9 @@ class Intro(Slide):
         # Isolate subjects and set key map
         solution2_strings = []
         solution3_strings = []
-        solution_key_map = {}
         for i in range(5):
             solution2_strings += [f"({2*i}, ", f"{4-i}) ", r"\quad "]
             solution3_strings += [f"_8C_{2*i} ", r"\cdot ", f"_{8-2*i}C_{4-i} ", "+ "]
-            solution_key_map[f"({2*i}, "] = f"_8C_{2*i} "
-            solution_key_map[f"{4-i}) "] = f"_{8-2*i}C_{4-i} "
         # Remove trailing \quad and +
         solution2_strings.pop()
         solution3_strings.pop()
@@ -2850,10 +2836,7 @@ class Outro(Slide):
 
         for i in range(5):
             self.play(
-                Indicate(sol1[i]),
-                Indicate(sol2[i]),
-                Indicate(sum[i]),
-                run_time=0.7
+                Indicate(sol1[i]), Indicate(sol2[i]), Indicate(sum[i]), run_time=0.7
             )
         self.wait(0.1)
         self.next_slide()
