@@ -2303,7 +2303,7 @@ class ToIntegral2(Slide):
                 r"c_8 =& ",
                 r"\int ^1 _0",
                 r"\sum ^8 _{k=0}",
-                r"{_n C _k}",
+                r"{_8 C _k}",
                 r"(2 \cos{2 \pi x})^k",
                 r"\> dx",
             ),
@@ -2311,7 +2311,7 @@ class ToIntegral2(Slide):
                 r"c_8 =& ",
                 r"\int ^1 _0",
                 r"\sum ^8 _{k=0}",
-                r"{_n C _k}",
+                r"{_8 C _k}",
                 r"2^k",
                 r"\cos^k{2 \pi x}",
                 r"\> dx",
@@ -2319,7 +2319,7 @@ class ToIntegral2(Slide):
             MathTex(
                 r"c_8 =& ",
                 r"\sum ^8 _{k=0}",
-                r"{_n C _k}",
+                r"{_8 C _k}",
                 r"2^k",
                 r"\int ^1 _0",
                 r"\cos^k{2 \pi x}",
@@ -2489,6 +2489,10 @@ class Integral(Slide):
         self.next_slide()
 
         self.play(Circumscribe(integral_calc[4][7:35]))
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(Indicate(integral_calc[4][7:13]))
         self.wait(0.1)
         self.next_slide()
 
@@ -2718,16 +2722,157 @@ class Integral(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        self.play(FadeOut(*self.mobjects))
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
 
-        # TODO Results
+
+class Results(Slide):
+    def construct(self):
+        c_8 = MathTex(
+            r"c_8 =& ",
+            r"\sum ^8 _{k=0}",
+            r"{_8 C _k}",
+            r"2^k",
+            r"\int ^1 _0",
+            r"\cos^k{2 \pi x}",
+            r"\> dx",
+        )
+        self.play(Write(c_8), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(c_8.animate.shift(UP * 1.5), run_time=0.4)
+        result = MathTex(
+            r"= & \; {_8C_0 } \cdot 4^0 \cdot {1}",
+            r"+ {_8C_2 } \cdot 4^1 \cdot {1 \over 2}",
+            r"+ {_8C_4 } \cdot 4^2 \cdot {3 \cdot 1 \over 4 \cdot 2} \\",
+            r"& + {_8C_6 } \cdot 4^3 \cdot {5 \cdot 3 \cdot 1 \over 6 \cdot 4 \cdot 2}",
+            r"+ {_8C_8 } \cdot 4^4 \cdot {7 \cdot 5 \cdot 3 \cdot 1 \over 8 \cdot 6 \cdot 4 \cdot 2}",
+        )
+        result.scale(0.8).next_to(c_8, DOWN)
+        self.play(Write(result), run_time=1)
+        self.wait(0.1)
+        self.next_slide()
+
+        result2 = MathTex("= 1 + 56 + 420 + 560 + 70 = 1107")
+        result2.next_to(result, DOWN, 0.8)
+        self.play(FadeIn(result2, scale=1.2), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(*self.mobjects), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
 
 
-# TODO Outro
 class Outro(Slide):
     def construct(self):
-        self.play(FadeOut(*self.mobjects))
+        overview_rectangle_style = {
+            "color": WHITE,
+            "height": 2.5,
+            "width": 4.5,
+            "stroke_width": 1.5,
+        }
+        overview_imgs = Group(
+            Rectangle(**overview_rectangle_style).add(
+                Tex(
+                    r"0 \cdot 4 + 1 \cdot 0 + 2 \cdot 4 \rightarrow {_8C_4 \cdot _4C_0 \cdot _4C_4} \\ "
+                    r"0 \cdot 3 + 1 \cdot 2 + 2 \cdot 3 \rightarrow {_8C_3 \cdot _5C_2 \cdot _3C_3} \\ "
+                    r"0 \cdot 2 + 1 \cdot 4 + 2 \cdot 2 \rightarrow {_8C_2 \cdot _6C_4 \cdot _2C_2} \\ "
+                    r"\vdots",
+                    tex_environment="gather*",
+                ).scale(0.5)
+            ),
+            Rectangle(**overview_rectangle_style).add(
+                MathTex(
+                    r"&f(x) = (1+x+x^2)^8 \\ "
+                    r"=& \; c_0 + c_1 \cdot x + c_2 \cdot x^2 + \cdots  \\ "
+                    r"&+ c_8 \cdot x^8 + \cdots + c_{16} \cdot x^{16}",
+                ).scale(0.65)
+            ),
+            Rectangle(**overview_rectangle_style).add(
+                MathTex(
+                    r"c_8 =& {1 \over n} \sum^{n-1}_{k=0} f(z^k) z^{-8k} \\"
+                    r"=& {1 \over n} \sum^{n-1}_{k=0} (1 + 2\cos{2 k \pi \over n})^8",
+                ).scale(0.6)
+            ),
+            Rectangle(**overview_rectangle_style).add(
+                MathTex(
+                    r"&\lim_{n \to \infty} {1 \over n}{\sum^{n-1}_{k=0} (1 + 2\cos{2 k \pi \over n})^8} \\ "
+                    r"=& \sum^{8}_{k=0} {_8C_k} 2^k \int^1_0 \cos^k{2 \pi x} \> dx ",
+                ).scale(0.6)
+            ),
+        ).arrange_in_grid(
+            buff=(1, 0.5),
+            col_alignments="cc",
+            row_alignments="cc",
+            flow_order="rd",
+        )
+
+        # Highlight c_8
+        overview_imgs[1].submobjects[0][0][33:35].set_color(color=BLUE)
+        overview_imgs[2].submobjects[0][0][0:2].set_color(color=BLUE)
+
+        self.play(FadeIn(overview_imgs, scale=0.8), run_time=0.7)
         self.wait(0.1)
         self.next_slide()
+
+        self.play(FadeOut(overview_imgs, scale=0.8), run_time=0.5)
+
+        sol1 = MathTex(
+            r"{_8C_0}\cdot_{8}C_{8}",
+            r"+ {_8C_1}\cdot_{7}C_{6}",
+            r"+ {_8C_2}\cdot_{6}C_{4}",
+            r"+ {_8C_3}\cdot_{5}C_{2}",
+            r"+ {_8C_4}\cdot_{4}C_{0}",
+        )
+        sol2 = MathTex(
+            r"& {_8C_0 } \cdot 4^0 \cdot {1}",
+            r"+ {_8C_2 } \cdot 4^1 \cdot {1 \over 2}",
+            r"+ {_8C_4 } \cdot 4^2 \cdot {3 \cdot 1 \over 4 \cdot 2} \\",
+            r"& + {_8C_6 } \cdot 4^3 \cdot {5 \cdot 3 \cdot 1 \over 6 \cdot 4 \cdot 2}",
+            r"+ {_8C_8 } \cdot 4^4 \cdot {7 \cdot 5 \cdot 3 \cdot 1 \over 8 \cdot 6 \cdot 4 \cdot 2} \\",
+        )
+        sum = MathTex("1 ", "+ 56", "+ 420", "+ 560", "+ 70 ", "= 1107")
+
+        Group(sol1, sol2, sum).arrange(DOWN, buff=1)
+
+        self.play(FadeIn(sol1), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+        self.play(FadeIn(sol2), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+        self.play(FadeIn(sum), run_time=0.5)
+        self.wait(0.1)
+        self.next_slide()
+
+        for i in range(5):
+            self.play(
+                Indicate(sol1[i]),
+                Indicate(sol2[i]),
+                Indicate(sum[i]),
+                run_time=0.7
+            )
+        self.wait(0.1)
+        self.next_slide()
+
+        self.play(FadeOut(*self.mobjects), run_time=0.8)
+
+        thoughts = Group(
+            MathTex("c_0 + c_4 + c_8 + \cdots \\"),
+            MathTex(r"e^{i \theta} = \cos \theta + i \sin \theta"),
+            MathTex(r"X_k = \sum ^{N-1} _{n=0} x_n \cdot e^{{-i 2 \pi \over N} k n}"),
+        )
+
+        thoughts[0].shift(UP * 2, LEFT * 3)
+        thoughts[1].shift(RIGHT * 2)
+        thoughts[2].shift(DOWN * 2, LEFT * 1)
+
+        for i in thoughts:
+            self.play(FadeIn(i, scale=0.9), run_time=0.8)
+            self.wait(0.1)
+            self.next_slide()
+
+        self.play(FadeOut(*self.mobjects), run_time=0.8)
