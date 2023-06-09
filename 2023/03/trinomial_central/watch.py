@@ -1,9 +1,14 @@
+import ast
 import os
 import platform
 import subprocess
+import sys
 import threading
 import time
+from pathlib import Path
 from typing import Callable
+
+from manim.utils import module_ops
 
 
 def clear():
@@ -72,18 +77,58 @@ def watch(file, command, interval: float = 1, on_exit: Callable | None = None):
         stamp = os.stat(file).st_mtime
 
 
+def get_scenes_in_file(path):
+    module = module_ops.get_module(Path(path))
+    scenes = [
+        scene.__name__ for scene in module_ops.get_scene_classes_from_module(module)
+    ]
+
+    with open(path, "r") as f:
+        content = f.read()
+        parsed_ast = ast.parse(content)
+        scenes_ordered = []
+        for n in ast.walk(parsed_ast):
+            if isinstance(n, ast.ClassDef) and n.name in scenes:
+                scenes_ordered.append(n.name)
+
+    return scenes_ordered
+
+
 def main():
-    # TODO Add arg parser to set scenes
-    # or input keys to change scenes
-    
-    #scenes = "Intro Polynomial ComplexTrigonometry ValueToCoeff Integral Outro"
-    scenes = "Integral"
+    file = "slides.py"
+    scenes = get_scenes_in_file(file)
+
+    def select_scenes():
+        for i, s in enumerate(scenes):
+            print(f"{i+1}: {s}")
+
+        while True:
+            try:
+                selections = [int(i) for i in input("Select scenes: ").split(",")]
+                for i in selections:
+                    if not (0 < i and i < len(scenes) + 1):
+                        raise IndexError(f"Index out of range: {i}")
+                selected_scenes = " ".join(scenes[i - 1] for i in selections)
+                break
+            except (ValueError, IndexError) as e:
+                print(e)
+        return selected_scenes
+
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "-a":
+            selected_scenes = " ".join(scenes)
+        else:
+            selected_scenes = " ".join(sys.argv[1:])
+    else:
+        selected_scenes = select_scenes()
+
+    title = "미적분을 활용한 확률과 통계 문제 풀이"
     output = "slides.html"
     verbosity = "info"
     quality = "l"
     command = (
-        f"manim -q{quality} -v {verbosity} --progress_bar display slides.py {scenes} && "
-        f"manim-slides convert {scenes} {output}"
+        f"manim -q{quality} -v {verbosity} --progress_bar display {file} {selected_scenes} && "
+        f"manim-slides convert -ctitle='{title}' {selected_scenes} {output}"
     )
 
     def success_message():
