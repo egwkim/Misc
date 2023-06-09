@@ -116,8 +116,9 @@ def main():
 
     if len(sys.argv) > 1:
         if sys.argv[1] == "-a":
-            selected_scenes = scenes
-        selected_scenes = " ".join(sys.argv[1:])
+            selected_scenes = " ".join(scenes)
+        else:
+            selected_scenes = " ".join(sys.argv[1:])
     else:
         selected_scenes = select_scenes()
 
