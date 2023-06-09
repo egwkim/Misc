@@ -1,6 +1,5 @@
 from typing import Any, Type
 
-# TODO Highlight equations
 
 from manim import *
 from manim_slides import Slide
@@ -35,7 +34,7 @@ class Intro(Slide):
     """
 
     def construct(self):
-        # <Title>
+        # Title
         title = Group(
             Text("미적분을 활용한").scale(1.5),
             Text("확률과 통계 문제 풀이").scale(1.5),
@@ -50,11 +49,11 @@ class Intro(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        # <Overview>
         self.play(FadeOut(title), run_time=0.5)
         self.wait(0.1)
         self.next_slide()
 
+        # Overview
         overview_text = Text("Overview").scale(1).center().shift(UP * 3)
 
         overview_rectangle_style = {
@@ -120,7 +119,7 @@ class Intro(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        # <Problem introduction>
+        # Problem introduction
         problem = Group(
             Group(
                 Text("8개의 정수"),
@@ -163,7 +162,7 @@ class Intro(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        # <Solution>
+        # Solution
         solution1_1 = MathTex("x")
         solution1_2 = MathTex("x", r", \; ", "y")
         solution1_3 = MathTex("x", r" + 2 ", "y", " = 8")
@@ -183,7 +182,8 @@ class Intro(Slide):
         self.wait(0.1)
         self.next_slide()
 
-        # Isolate subjects and set key map
+        # Generate string list to split mathtex
+        # Splitted parts are used for transform animation
         solution2_strings = []
         solution3_strings = []
         for i in range(5):
@@ -258,6 +258,7 @@ class Polynomial(Slide):
     """
 
     def construct(self):
+        # Show polynomial
         polynomial = MathTex(
             "(1+x+x^2)",
             "^8",
@@ -266,6 +267,7 @@ class Polynomial(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Explain 1 + x + x^2
         x0_rect = SurroundingRectangle(polynomial[0][1])
         x1_rect = SurroundingRectangle(polynomial[0][3])
 
@@ -314,10 +316,12 @@ class Polynomial(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Indicate exponent ^8
         self.play(Indicate(polynomial[1][0]))
         self.wait(0.1)
         self.next_slide()
 
+        # Expand exponentiation
         expansion1 = MathTex(
             "(1+x+x^2)",
             "(1+x+x^2)",
@@ -335,6 +339,7 @@ class Polynomial(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Relation between polynomial and a_1 ~ a_8
         a1_choice = MathTex(
             "1",
         )
@@ -532,6 +537,7 @@ class Polynomial(Slide):
 
         self.remove(multiplication, a_sum)
 
+        # Show other choices
         for i in range(len(multiplications) - 1):
             self.add(multiplications[i], a_sums[i])
             self.wait(0.1)
@@ -542,6 +548,7 @@ class Polynomial(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Expand polynomial and highlight c_8
         expansion2 = (
             MathTex(
                 r"= c_0 + c_1 \cdot x + \cdots + ",
@@ -704,7 +711,9 @@ class ComplexTrigonometry(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Indicate real part
         self.play(Indicate(complex_number[0]))
+        # Indicate imaginary part
         self.play(Indicate(complex_number[4:]))
         self.wait(0.1)
         self.next_slide()
@@ -884,40 +893,27 @@ class ComplexPlaneSlide(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Move along the x-axis
+        numbers = [1, -1, 0]
         self.start_loop()
-        self.play(dot.animate.move_to(plane.n2p(1)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(-1)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(0)))
-        self.wait()
+        for n in numbers:
+            self.play(dot.animate.move_to(plane.n2p(n)))
+            self.wait(0.5)
         self.end_loop()
 
-        self.wait()
+        # Move along the x-axis
+        numbers = [1j, -1j, 0]
         self.start_loop()
-        self.play(dot.animate.move_to(plane.n2p(1j)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(-1j)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(0)))
-        self.wait()
+        for n in numbers:
+            self.play(dot.animate.move_to(plane.n2p(n)))
+            self.wait(0.5)
         self.end_loop()
 
-        self.wait()
-        self.play(dot.animate.move_to(plane.n2p(1 + 0.5j)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(-2 + 1j)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(-1.5 + 0.2j)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(-0.5 - 0.7j)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(1 - 1j)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(0.7 + 0.3j)))
-        self.wait(0.5)
-        self.play(dot.animate.move_to(plane.n2p(0)))
-        self.wait(0.1)
+        # Move around
+        numbers = [1 + 0.5j, -2 + 1j, -1.5 + 0.2j, -0.5 - 0.7j, 1 - 1j, 0.7 + 0.3j, 0]
+        for n in numbers:
+            self.play(dot.animate.move_to(plane.n2p(n)))
+            self.wait(0.5)
         self.next_slide()
 
         self.play(FadeOut(dot, label), run_time=0.5)
@@ -936,6 +932,7 @@ class ComplexPlaneSlide(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Complex number sum overlay
         complex_sum_tex = MathTex(
             r"z_1 &= a + bi \\ ",
             r"z_2 &= c + di \\ ",
@@ -1020,6 +1017,7 @@ class ComplexPlaneSlide(Slide):
         self.wait(0.1)
         self.next_slide()
 
+        # Unit circle and complex number multiplication
         unit_circle = Circle.from_three_points(
             *(plane.n2p(1), plane.n2p(-1), plane.n2p(1j)),
             color=GREEN,
@@ -1208,6 +1206,7 @@ class ComplexPlaneSlide(Slide):
             run_time=0.5,
         )
 
+        # nth roots of unity
         plane.generate_target()
         plane.target = ComplexPlane(
             x_range=(-1.2, 1.2, 1),
