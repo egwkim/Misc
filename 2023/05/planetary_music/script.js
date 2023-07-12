@@ -63,17 +63,19 @@ class Planet {
     let d2 = dx ** 2 + dy ** 2;
     let d = Math.sqrt(d2);
     let accel = sun.g / d2;
-    this.vx -= (accel * dx) / d;
-    this.vy -= (accel * dy) / d;
+    this.vx -= (accel * dx) * dt / d;
+    this.vy -= (accel * dy) * dt / d;
     this.osc.set({ frequency: this.v * frequency_factor });
   }
 }
 
-const sun = new Sun(40, '#ffc10788', 35000);
+const sun = new Sun(20, '#ffc10788', 3000000);
 const planets = [];
 
-planets.push(new Planet(width / 2 - 10, height / 2 + 155, 80, 25, 8, '#007bff'));
-planets.push(new Planet(width / 2 + 10, height / 2 - 230, -75, 15, 7, '#7bff00'));
+gene = [135.5259652603542, 141.80177340729358, 117.64249757691634, 83.7842975500333, 140.67154561572661, 56.7265774905456]
+
+planets.push(new Planet(width / 2, height / 2 + gene[0], gene[1], gene[2], 8, '#007bff'));
+planets.push(new Planet(width / 2 + gene[3], height / 2 + gene[4], gene[5], 0, 7, '#7bff00'));
 
 let muted = true;
 document.addEventListener('click', () => {
@@ -95,7 +97,8 @@ document.addEventListener('click', () => {
 let prev_timeStampe;
 function render(timeStamp) {
   if (!prev_timeStampe) prev_timeStampe = timeStamp;
-  const dt = (timeStamp - prev_timeStampe) / 1000;
+  // const dt = (timeStamp - prev_timeStampe) / 1000;
+  const dt = 0.01;
   prev_timeStampe = timeStamp;
 
   ctx.clearRect(0, 0, width, height);
