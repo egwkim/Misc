@@ -1,6 +1,6 @@
-const canvas = document.getElementById("canvas");
+const canvas = document.getElementById('canvas');
 /** @type {CanvasRenderingContext2D} */
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext('2d');
 
 let width, height;
 
@@ -10,7 +10,7 @@ resize = () => {
   width = canvas.width;
   height = canvas.height;
 };
-window.addEventListener("resize", resize);
+window.addEventListener('resize', resize);
 resize();
 
 class Sun {
@@ -33,7 +33,6 @@ class Sun {
 
 const frequency_factor = 4;
 class Planet {
-
   constructor(x, y, vx, vy, r, color) {
     this.x = x;
     this.y = y;
@@ -70,22 +69,22 @@ class Planet {
   }
 }
 
-const sun = new Sun(40, "#ffc10788", 35000);
+const sun = new Sun(40, '#ffc10788', 35000);
 const planets = [];
 
-planets.push(new Planet(width / 2 - 10, height / 2 + 155, 80, 25, 8, "#007bff"));
-planets.push(new Planet(width / 2 + 10, height / 2 - 230, -75, 15, 7, "#7bff00"));
+planets.push(new Planet(width / 2 - 10, height / 2 + 155, 80, 25, 8, '#007bff'));
+planets.push(new Planet(width / 2 + 10, height / 2 - 230, -75, 15, 7, '#7bff00'));
 
 let muted = true;
-document.addEventListener("click", () => {
+document.addEventListener('click', () => {
   if (muted) {
-    sun.color = "#ffc107";
+    sun.color = '#ffc107';
     muted = false;
     planets.forEach((planet) => {
       planet.osc.start();
     });
   } else {
-    sun.color = "#ffc10788";
+    sun.color = '#ffc10788';
     muted = true;
     planets.forEach((planet) => {
       planet.osc.stop();
