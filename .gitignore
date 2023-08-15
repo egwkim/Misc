@@ -1,9 +1,12 @@
+# Text editor
 .vscode/
 
+# Data files, binaries
+data/
 *.exe
 
+# Python
 .venv/
-
 __pycache__/
 *.py[cod]
 
