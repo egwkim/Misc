@@ -1,0 +1,11 @@
+# Data directory
+data/
+
+# Python venv
+.venv/
+
+# Python
+*.py[cod]
+
+# Notebook
+.ipynb_checkpoints/
