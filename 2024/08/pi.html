@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>π</title>
+</head>
+
+<body>
+    <canvas width="1024" height="1024" id="cvs"></canvas>
+    <script>
+        // reference
+        // https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula
+        // https://www.davidhbailey.com/dhbpapers/bbp-alg.pdf
+        // https://stackoverflow.com/a/40620751
+
+        const cvs = document.getElementById("cvs");
+        const ctx = cvs.getContext("2d");
+
+        function pi_spigot(n) {
+            function expmod(base, exp, mod) {
+                let r = 1
+                while (exp > 0) {
+                    if (exp & 1) {
+                        r = r * base % mod;
+                    }
+                    base = base * base % mod;
+                    exp >>= 1;
+                }
+                return r;
+            };
+
+            function s(d, j) {
+                let sum = 0;
+                let k;
+                for (k = 0; k <= d; k++) {
+                    sum += expmod(16, d - k, 8 * k + j) / (8 * k + j);
+                }
+                let prev = undefined;
+                for (k = d + 1; sum != prev; k++) {
+                    prev = sum;
+                    sum += 16 ** (d - k) / (8 * k + j);
+                }
+                return sum % 1;
+            };
+
+            return (4 * s(n, 1) - 2 * s(n, 4) - s(n, 5) - s(n, 6) + 4) % 1;
+
+        };
+
+        const block_size = 4;
+
+        const w = Math.ceil(cvs.width / block_size);
+        const h = Math.ceil(cvs.height / block_size);
+
+        const m_wb = Math.ceil(w * h / 4);
+        const m_color = w * h;
+
+        function fill(n, color) {
+            // fill nth block
+            x = n % w;
+            y = Math.trunc(n / w);
+            ctx.fillStyle = color;
+            ctx.fillRect(x * block_size, y * block_size, block_size, block_size);
+        }
+
+        let batch;
+        function drawWb(n, prev) {
+            while (n < m_wb) {
+                r = pi_spigot(n) * 16;
+                d = Math.trunc(r);
+                if (d != prev) {
+                    console.log("Low precision at digit " + n, d, prev);
+                }
+                prev = Math.trunc(r * 16) % 16;
+                for (let i = 0; i < 4; i++) {
+                    if ((d & 8) == 0) {
+                        fill(4 * n + i, "black");
+                    } else {
+                        fill(4 * n + i, "white");
+                    }
+                    d <<= 1;
+                }
+
+                n++;
+
+                if (n >= m_wb) return;
+
+                if (n % batch == 0) {
+                    setTimeout(drawWb, 0, n, prev);
+                    return;
+                }
+
+            }
+        };
+
+
+        function drawColor(n, prev) {
+            while (n < m_color) {
+                let rgb = 0;
+                for (let j = 0; j < 6; j++) {
+                    r = pi_spigot(6 * n + j) * 16;
+                    d = Math.trunc(r);
+                    if (d != prev) {
+                        console.log("Low precision at digit " + 6 * n + j, d, prev);
+                    }
+                    prev = Math.trunc(r * 16) % 16;
+                    rgb <<= 4;
+                    rgb += d;
+                }
+                fill(n, '#' + rgb.toString(16));
+
+                n++;
+
+                if (n >= m_color) return;
+
+                if (n % batch == 0) {
+                    setTimeout(drawColor, 0, n, prev);
+                    return;
+                }
+            }
+        };
+
+        // batch = 128; drawWb(0, 2);
+        // batch = 16; drawColor(0, 2); // too slow :(
+
+    </script>
+</body>
+
+</html>
