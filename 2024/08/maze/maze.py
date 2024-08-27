@@ -45,7 +45,7 @@ def bmp(maze):
     data += bytearray.fromhex('00000000')  # Black
 
     # Bitmap data
-    for row in maze:
+    for row in maze[::-1]:
         maze_data = 0
         walls = (1 << cell_size) - 1
         for _ in range(maze_width):
@@ -60,7 +60,6 @@ def bmp(maze):
 
 
 def rand_dfs(x, y):
-    # x is inverted
     # 0: shaft, 1: wall
     maze = [2 ** (2 * x + 1) - 1] * (2 * y + 1)
 
@@ -69,9 +68,9 @@ def rand_dfs(x, y):
     cur_x, cur_y = cur
     stack = [cur]
     visited[0][0] = True
-    maze[0] -= 1 << 1
-    maze[1] -= 1 << 1
-    maze[-1] -= 1 << 2 * x - 1
+    maze[0] -= 1 << 2 * x - 1
+    maze[1] -= 1 << 2 * x - 1
+    maze[-1] -= 1 << 1
 
     for i in range(x * y - 1):
         while True:
@@ -95,17 +94,17 @@ def rand_dfs(x, y):
 
         stack.append(cur)
         dx, dy = neighbors[random.randrange(len(neighbors))]
-        maze[2 * cur_y + 1 + dy] -= 1 << 2 * cur_x + 1 + dx
+        maze[2 * cur_y + 1 + dy] -= 1 << 2 * x - (2 * cur_x + 1 + dx)
         cur = (cur_x + dx, cur_y + dy)
         cur_x, cur_y = cur
-        maze[2 * cur_y + 1] -= 1 << 2 * cur_x + 1
+        maze[2 * cur_y + 1] -= 1 << 2 * x - (2 * cur_x + 1)
         visited[cur_y][cur_x] = True
 
     return maze
 
 
 def maze_str(maze):
-    maze_str = '\n'.join(f'{row:b}'[::-1] for row in maze)
+    maze_str = '\n'.join(f'{row:b}' for row in maze)
     maze_str = maze_str.replace('0', '  ')
     maze_str = maze_str.replace('1', '██')
     return maze_str
