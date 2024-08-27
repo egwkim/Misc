@@ -59,46 +59,46 @@ def bmp(maze):
     return data
 
 
-def rand_dfs(x, y):
+def rand_dfs(w, h):
     # 0: shaft, 1: wall
-    maze = [2 ** (2 * x + 1) - 1] * (2 * y + 1)
+    maze = [2 ** (2 * w + 1) - 1] * (2 * h + 1)
 
-    visited = [[False] * x for _ in range(y)]
+    visited = [[False] * w for _ in range(h)]
     cur = (0, 0)
-    cur_x, cur_y = cur
+    x, y = cur
     stack = [cur]
     visited[0][0] = True
-    maze[0] -= 1 << 2 * x - 1
-    maze[1] -= 1 << 2 * x - 1
+    maze[0] -= 1 << 2 * w - 1
+    maze[1] -= 1 << 2 * w - 1
     maze[-1] -= 1 << 1
 
-    for i in range(x * y - 1):
+    for i in range(w * h - 1):
         while True:
             neighbors = [(0, 1), (0, -1), (-1, 0), (1, 0)]
             for j in (3, 2, 1, 0):
                 dx, dy = neighbors[j]
                 # check index out of range
-                if (cur_x + dx) == -1 or (cur_y + dy) == -1:
+                if (x + dx) == -1 or (y + dy) == -1:
                     neighbors.pop(j)
-                elif (cur_x + dx) == x or (cur_y + dy) == y:
+                elif (x + dx) == w or (y + dy) == h:
                     neighbors.pop(j)
 
                 # check visited
-                elif visited[cur_y + dy][cur_x + dx]:
+                elif visited[y + dy][x + dx]:
                     neighbors.pop(j)
             if len(neighbors) == 0:
                 cur = stack.pop()
-                cur_x, cur_y = cur
+                x, y = cur
             else:
                 break
 
         stack.append(cur)
         dx, dy = neighbors[random.randrange(len(neighbors))]
-        maze[2 * cur_y + 1 + dy] -= 1 << 2 * x - (2 * cur_x + 1 + dx)
-        cur = (cur_x + dx, cur_y + dy)
-        cur_x, cur_y = cur
-        maze[2 * cur_y + 1] -= 1 << 2 * x - (2 * cur_x + 1)
-        visited[cur_y][cur_x] = True
+        maze[2 * y + 1 + dy] -= 1 << 2 * w - (2 * x + 1 + dx)
+        cur = (x + dx, y + dy)
+        x, y = cur
+        maze[2 * y + 1] -= 1 << 2 * w - (2 * x + 1)
+        visited[y][x] = True
 
     return maze
 
@@ -111,9 +111,9 @@ def maze_str(maze):
 
 
 def main():
-    x, y = map(int, input().split())
+    w, h = map(int, input().split())
 
-    maze = rand_dfs(x, y)
+    maze = rand_dfs(w, h)
     # with open('maze.txt', 'w', encoding='utf-8') as f:
     #     f.write(maze_str(maze))
 
