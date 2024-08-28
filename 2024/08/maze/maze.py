@@ -64,6 +64,8 @@ def rand_dfs(w, h):
     maze = [2 ** (2 * w + 1) - 1] * (2 * h + 1)
 
     visited = [[False] * w for _ in range(h)]
+
+    # x, y interval is two cells
     cur = (0, 0)
     x, y = cur
     stack = [cur]
